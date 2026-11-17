@@ -263,7 +263,7 @@ suite and against the public labels.
 Built by a team of four in 36 hours during the build phase of the CIBC Collections Hackathon (3–4 Oct 2026). The
 system was designed together. Each person's main contributions:
 
-**Anish Toshniwal: Data Product Factory, and the feature store on full data**
+**Anish Toshniwal: Data Product Factory, RAG, and the feature store on full data**
 - Built Layer 1 end to end:
   - bronze ingest and per-source silver parsers;
   - identity resolution (deterministic rules, Splink, constraints, clustering, crosswalk, threshold tuning, review
@@ -274,6 +274,12 @@ system was designed together. Each person's main contributions:
   - fairness audit, role-based access views, and sensitivity tags and mappings;
   - Dagster orchestration and the one-command build.
 - Wrote the data contract, the data-quality report and the Collections 360 page.
+- Built the RAG in Ask Collections:
+  - hybrid retrieval over agent notes (BM25 + `multilingual-e5-small` embeddings in a DuckDB vector store, English
+    and French);
+  - cited AI answers;
+  - the notes retrieval evaluation;
+  - the transcript RAG-versus-rules experiment.
 - Completed Layer 3 on full data: the history tables, the build command, label-aligned typed questions, the label
   evaluation and batch text features. Trained the promise-break model on full data.
 - Ran the final benchmark on the extra questions, with rule fixes; made the architecture diagram.
@@ -285,7 +291,6 @@ system was designed together. Each person's main contributions:
   - the coverage check, AI-extended SQL behind the SQL guard, and LLM guardrails;
   - policy answers with checked citations;
   - call-summary rules;
-  - notes RAG (BM25 + e5 embeddings) and the transcript RAG experiment;
   - the typo fixer and the query checker.
 - Built the benchmark runner, the dev scorer and the hidden holdout sets.
 - Built the Ask Collections page; also did the app's visual design and the live "Suggestions" coach in Agent Assist.

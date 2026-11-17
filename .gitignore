@@ -24,3 +24,16 @@ dbt/.user.yml
 *.log
 .ipynb_checkpoints/
 .cache/
+
+# Instructions for AI coding agents: kept locally, never pushed
+CLAUDE.md
+CLAUDE.local.md
+
+# More secret files (API keys live only in .env, which is ignored above)
+.streamlit/secrets.toml
+*.p12
+*.pfx
+credentials*.json
+*service-account*.json
+.netrc
+.envrc

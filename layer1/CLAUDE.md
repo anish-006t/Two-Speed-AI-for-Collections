@@ -1,12 +1,19 @@
 # Layer 1 working rules (owner: Anish)
 
-> Engineering rules for Layer 1. Code comments cite them as "CLAUDE.md rule N" (the hard rules below).
+> Was the root `CLAUDE.md` until 2026-10-03, when the repo became the team repo and Layer 1's code moved into
+> `layer1/`. The rules are unchanged except rule 9 (AI APIs), which the lead changed; paths and module names now
+> start with `layer1/` and `layer1.`. Team-wide rules are in the root `CLAUDE.md`.
+
+Deliverables for the rest of the build:
+
+@BRIEF.md
 
 We are building Layer 1 (Data Product Factory): 31 synthetic bank tables in, one golden customer record (`gold.c360_customer`) out, with an identity confidence on every golden ID. The full design is in `layer1/docs/architecture.md`: read it at the start of any Layer 1 phase, follow it, and flag any place the real data contradicts it.
 
 ## Reference files (read when needed, do not import whole)
 - `docs/data_dictionary/data_dictionary_columns.csv`: all 1,421 columns (table, column, type, key, description, example, sensitivity)
 - `docs/data_dictionary/data_dictionary_tables.csv` and `docs/data_dictionary/data_dictionary_relationships.csv`: table list and the 48 relationships
+- `docs/brief/`: hackathon brief and judging criteria
 - Raw data lives in `data/raw/maple_collections_release/` and is never committed to git
 - `layer1/docs/decisions.md`: what the real data showed and what we changed because of it (read before changing parsers or matching)
 
