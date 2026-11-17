@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: identity_input
+    description: One row per source customer key across the five identity sources; the only table Splink reads.
+    columns:
+      - name: source_key
+        tests: [unique, not_null]
+      - name: source_system
+        tests:
+          - not_null
+          - accepted_values:
+              values: [CRM, CARDS, LENDING, CORE_BANKING, BUREAU]
+      - name: source_id
+        tests: [not_null]
+      - name: dob_conflict
+        tests: [not_null]
+      - name: _pipeline_run_id
+        tests: [not_null]
+
+  - name: stg_crm_identity
+    columns:
+      - name: source_id
+        tests: [unique, not_null]
+  - name: card_customers
+    columns:
+      - name: source_id
+        tests: [unique, not_null]
+  - name: loan_customers
+    columns:
+      - name: source_id
+        tests: [unique, not_null]
+  - name: deposit_customers
+    columns:
+      - name: source_id
+        tests: [unique, not_null]
+  - name: bureau_subjects
+    columns:
+      - name: source_id
+        tests: [unique, not_null]
+
+  - name: quarantine
+    columns:
+      - name: rule
+        tests:
+          - accepted_values:
+              values: [name_layout, dob_format, phone_format, postal_format, fsa_unknown, cif_format]

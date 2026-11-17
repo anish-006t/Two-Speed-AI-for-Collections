@@ -1,0 +1,31 @@
+version: 2
+sources:
+  - name: bronze
+    schema: bronze
+    description: Files exactly as received (all columns text), loaded by layer1/pipeline/ingest/load_bronze.py.
+    tables:
+      - name: customers
+      - name: card_accounts
+      - name: loan_accounts
+      - name: deposit_accounts
+      - name: external
+      - name: collections_cases
+      - name: geo_reference
+      - name: contact_history
+      - name: promises_to_pay
+      - name: card_statements
+      - name: transactions
+      - name: account_monthly_snapshot
+      - name: salary_credit_history
+      - name: bureau_history
+      - name: ops_events
+  - name: identity
+    schema: identity
+    description: Written by layer1/identity/run.py (Splink, clustering, crosswalk); run it before gold.
+    tables:
+      - name: crosswalk
+      - name: golden_confidence
+      - name: golden_alias
+      - name: match_pairs
+      - name: review_queue
+      - name: match_quality

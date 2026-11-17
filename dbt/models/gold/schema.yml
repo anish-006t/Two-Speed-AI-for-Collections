@@ -1,0 +1,983 @@
+version: 2
+models:
+- name: c360_customer
+  description: "One row per golden customer: identity confidence, contact details, consent, contact rules, restrictions, hardship\
+    \ and incident flags, with lineage (data contract, architecture \xA711)."
+  columns:
+  - name: golden_customer_id
+    tests:
+    - unique
+    - not_null
+    description: 'Assigned by clustering; stable across runs. Source: identity.crosswalk.golden_customer_id'
+  - name: crm_customer_ids
+    description: 'All merged CRM records. Source: identity.crosswalk.source_id where source_system = ''CRM'''
+  - name: source_keys
+    description: 'Every source key in the cluster. Source: identity.crosswalk.source_key'
+  - name: match_probability
+    description: 'Lowest Splink probability among the links. Source: identity.crosswalk.match_probability'
+  - name: identity_confidence
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - high
+          - medium
+          - low
+    description: "High / medium / low (architecture \xA77). Source: identity.golden_confidence.identity_confidence"
+  - name: verify_before_disclosure
+    tests:
+    - not_null
+    description: 'True unless confidence is high. Source: identity.golden_confidence.identity_confidence'
+  - name: first_name
+    description: 'Most recently updated CRM record; else latest product. Source: customers.first_name Sensitivity: Direct
+      PII.'
+  - name: last_name
+    description: 'Most recently updated CRM record; else latest product. Source: customers.last_name Sensitivity: Direct PII.'
+  - name: primary_phone_e164
+    description: 'Most recently updated CRM record; else latest product. Source: customers.primary_phone_e164 Sensitivity:
+      Direct PII.'
+  - name: best_reachable_phone
+    description: 'Latest right-party contact on a consented CRM phone (D-06). Source: contact_history + customers.phone_number_hash,
+      rpc_flag'
+  - name: email
+    description: 'Most recently updated CRM record (CRM only). Source: customers.email Sensitivity: Direct PII.'
+  - name: date_of_birth
+    description: 'CRM value; product DOB only when no CRM record (identity only). Source: customers.date_of_birth Sensitivity:
+      Direct PII.'
+  - name: postal_code
+    description: 'Most recently updated CRM record; else latest product. Source: customers.postal_code Sensitivity: Quasi-identifier.'
+  - name: province_code
+    description: 'Most recently updated CRM record. Source: customers.province_code Sensitivity: Quasi-identifier.'
+  - name: time_zone
+    description: 'Most recently updated CRM record. Source: customers.time_zone'
+  - name: preferred_language
+    description: 'Most recently updated CRM record; servicing only, never a feature (Proxy, D-37). Source: customers.preferred_language
+      Sensitivity: Proxy (review).'
+  - name: product_count
+    description: 'Count of linked accounts. Source: gold.c360_accounts.account_id'
+  - name: has_card
+    description: 'Any linked card. Source: gold.c360_accounts.product'
+  - name: has_loan
+    description: 'Any linked loan. Source: gold.c360_accounts.product'
+  - name: has_deposit
+    description: 'Any linked deposit account. Source: gold.c360_accounts.product'
+  - name: total_credit_exposure
+    description: 'Card balance + loan outstanding + overdraft used. Source: gold.c360_accounts.credit_exposure'
+  - name: max_dpd_current
+    description: 'Maximum over linked accounts. Source: gold.c360_accounts.dpd'
+  - name: open_case_id
+    description: 'Latest open case (outcome is null). Source: collections_cases.case_id'
+  - name: current_bucket
+    description: 'Bucket of the latest open case. Source: collections_cases.current_bucket'
+  - name: consent_call
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_call'
+  - name: consent_call_mobile
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_call_mobile'
+  - name: consent_autodialer
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_autodialer'
+  - name: consent_sms
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_sms'
+  - name: consent_email
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_email'
+  - name: consent_push
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_push'
+  - name: permitted_call_start_local
+    description: 'Most recently updated CRM record. Source: customers.permitted_call_start_local'
+  - name: permitted_call_end_local
+    description: 'Most recently updated CRM record. Source: customers.permitted_call_end_local'
+  - name: sunday_contact_permitted
+    description: 'False if any merged CRM record is false. Source: customers.sunday_contact_permitted'
+  - name: voicemail_permitted
+    description: 'False if any merged CRM record is false. Source: customers.voicemail_permitted'
+  - name: contact_at_work_permitted
+    description: 'False if any merged CRM record is false. Source: customers.contact_at_work_permitted'
+  - name: cease_communication_flag
+    description: 'True if any merged CRM record is true. Source: customers.cease_communication_flag'
+  - name: internal_do_not_call_flag
+    description: 'True if any merged CRM record is true. Source: customers.internal_do_not_call_flag'
+  - name: deceased_flag
+    description: 'True if any merged CRM record is true. Source: customers.deceased_flag'
+  - name: bankruptcy_flag
+    description: 'True if any merged CRM record is true. Source: customers.bankruptcy_flag'
+  - name: consumer_proposal_flag
+    description: 'True if any merged CRM record is true. Source: customers.consumer_proposal_flag'
+  - name: legal_representative_flag
+    description: 'True if any merged CRM record is true. Source: customers.legal_representative_flag'
+  - name: credit_counselling_agency_flag
+    description: 'True if any merged CRM record is true. Source: customers.credit_counselling_agency_flag'
+  - name: hardship_flag
+    description: 'True if any case or account is true; protective use only. Source: collections_cases + account tables.hardship_flag,
+      hardship_program_flag'
+  - name: incident_affected
+    description: 'Any INC-0914 signal (D-24). Source: gold.incident_effects.golden_customer_id'
+  - name: source_systems
+    description: 'Systems in the cluster. Source: identity.crosswalk.source_system'
+  - name: survivorship_source
+    description: 'Which record supplied each group of fields. Source: pipeline'
+  - name: _source_system
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._source_system'
+  - name: _source_file
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._source_file'
+  - name: _batch_id
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._batch_id'
+  - name: _loaded_at
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._loaded_at'
+  - name: _pipeline_run_id
+    tests:
+    - not_null
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._pipeline_run_id'
+- name: c360_accounts
+  columns:
+  - name: golden_customer_id
+    description: Golden customer ID from identity resolution (identity.crosswalk).
+  - name: source_key
+    description: source_system:source_id key of the record in identity resolution.
+  - name: account_id
+    tests:
+    - unique
+    - not_null
+    description: Account ID as in the source system (card_account_id, loan_id or deposit_account_id).
+  - name: product
+    description: card, loan or deposit.
+  - name: product_type
+    description: Product type or code from the source account table.
+  - name: account_status
+    description: Status (from card_accounts).
+  - name: open_date
+    description: Account open date (from card_accounts).
+  - name: balance
+    description: Current balance (card), total outstanding (loan) or current balance (deposit), CAD.
+  - name: credit_limit
+    description: Current credit limit (CAD) (from card_accounts).
+  - name: credit_exposure
+    description: Card balance, loan outstanding or overdraft used, counted in total_credit_exposure.
+  - name: past_due_amount
+    description: Amount past due (from card_accounts).
+  - name: dpd
+    description: Days past due at snapshot (from card_accounts).
+  - name: dpd_bucket
+    description: Delinquency bucket (from card_accounts).
+  - name: chargeoff_flag
+    description: Charged off (from card_accounts).
+  - name: hardship_program_flag
+    description: On a card hardship programme (from card_accounts).
+  - name: snapshot_date
+    description: Snapshot date (month-end or daily) (from card_accounts).
+  - name: _source_system
+    description: 'Lineage: source system of the row.'
+  - name: _source_file
+    description: 'Lineage: file the row came from.'
+  - name: _batch_id
+    description: 'Lineage: load batch.'
+  - name: _loaded_at
+    description: 'Lineage: when the source file was loaded.'
+  - name: dpd_missing
+    description: True when dpd is empty in the source (about 8% of card and loan rows); never filled from cycles.
+  - name: dpd_bucket_recomputed
+    description: Bucket derived from dpd with the release's bucket edges; NULL when dpd is missing (D-38).
+  - name: dpd_bucket_mismatch
+    description: True when the source bucket disagrees with dpd_bucket_recomputed.
+  - name: _pipeline_run_id
+    description: 'Lineage: dbt invocation that built the row.'
+  description: Every card, loan and deposit account with its golden customer ID and recomputed DPD bucket.
+- name: account_monthly_snapshot
+  description: Quarter-end account history with parsed month_end_date and recomputed buckets (D-38).
+  columns:
+  - name: golden_customer_id
+    description: Golden customer ID from identity resolution (identity.crosswalk).
+  - name: account_id
+    description: Account ID as in the source system (card_account_id, loan_id or deposit_account_id).
+  - name: crm_customer_id_as_received
+    description: CRM ID from the snapshot as received; noisy, so not used for linking (D-03).
+  - name: product_type
+    description: Product type or code from the source account table.
+  - name: month_end_date_raw
+    description: month_end_date as received.
+  - name: month_end_date
+    description: month_end_date parsed from four formats; NULL unless it is a month end (D-38).
+  - name: month_end_date_format
+    tests:
+    - accepted_values:
+        arguments:
+          values:
+          - YYYY-MM-DD
+          - DD/MM/YYYY
+          - MM/DD/YYYY
+          - YYYYMMDD
+          - unknown
+    description: Which of the four formats the raw value used.
+  - name: account_status
+    description: Status at month end. (as received from account_monthly_snapshot).
+  - name: balance
+    description: Current balance (card), total outstanding (loan) or current balance (deposit), CAD.
+  - name: limit_or_original_amount
+    description: Credit limit (revolving) or original amount (instalment). (as received from account_monthly_snapshot).
+  - name: minimum_due
+    description: Minimum payment or scheduled instalment due this month. (as received from account_monthly_snapshot).
+  - name: payment_made
+    description: Payments received this month. (as received from account_monthly_snapshot).
+  - name: dpd
+    description: Days past due at month end. (as received from account_monthly_snapshot).
+  - name: dpd_missing
+    description: True when dpd is empty in the source (about 8% of card and loan rows); never filled from cycles.
+  - name: dpd_bucket
+    description: Lateness bucket at month end. (as received from account_monthly_snapshot).
+  - name: dpd_bucket_recomputed
+    description: Bucket derived from dpd with the release's bucket edges; NULL when dpd is missing (D-38).
+  - name: dpd_bucket_mismatch
+    description: True when the source bucket disagrees with dpd_bucket_recomputed.
+  - name: overlimit_flag
+    description: 'Yes/No: over the credit limit at month end. (as received from account_monthly_snapshot).'
+  - name: write_off_flag
+    description: 'Yes/No: written off in or before this month. (as received from account_monthly_snapshot).'
+  - name: salary_credit_amount
+    description: Salary credited this month (deposit rows only). (as received from account_monthly_snapshot).
+  - name: _source_system
+    description: 'Lineage: source system of the row.'
+  - name: _source_file
+    description: 'Lineage: file the row came from.'
+  - name: _batch_id
+    description: 'Lineage: load batch.'
+  - name: _loaded_at
+    description: 'Lineage: when the source file was loaded.'
+  - name: _pipeline_run_id
+    description: 'Lineage: dbt invocation that built the row.'
+- name: cases
+  columns:
+  - name: golden_customer_id
+    description: Golden customer ID from identity resolution (identity.crosswalk).
+  - name: customer_ref_unresolved
+    description: True when coll_customer_ref matches no current CRM record (D-13).
+  - name: case_link_alarm
+    description: "True when an account in the case belongs to a different golden customer than the case (\xA77)."
+  - name: account_golden_ids
+    description: Golden IDs of the accounts listed in the case.
+  - name: current_bucket_recomputed
+    description: Bucket derived from current_dpd (D-38).
+  - name: current_bucket_mismatch
+    description: True when the source current_bucket disagrees with current_dpd.
+  - name: account_id_list
+    description: account_ids parsed from JSON or a bare ID (D-13).
+  - name: case_id
+    tests:
+    - unique
+    - not_null
+    description: Case key (as received from collections_cases).
+  - name: coll_customer_ref
+    description: Collections platform customer reference (copied from CRM at case open) (as received from collections_cases).
+  - name: case_open_date
+    description: Case opened (as received from collections_cases).
+  - name: case_open_reason
+    description: Trigger (as received from collections_cases).
+  - name: case_status
+    description: Status (as received from collections_cases).
+  - name: case_status_date
+    description: Date status last changed (as received from collections_cases).
+  - name: primary_account_id
+    description: Worst account in case (as received from collections_cases).
+  - name: primary_product
+    description: card / personal_loan / auto_loan / loc (as received from collections_cases).
+  - name: account_ids
+    description: All accounts in case (as received from collections_cases).
+  - name: accounts_in_case_count
+    description: Number of accounts (as received from collections_cases).
+  - name: entry_dpd
+    description: DPD at case open (as received from collections_cases).
+  - name: current_dpd
+    description: Max DPD across case accounts today (as received from collections_cases).
+  - name: max_dpd_episode
+    description: Worst DPD in episode (as received from collections_cases).
+  - name: current_bucket
+    description: Bucket (as received from collections_cases).
+  - name: bucket_entry_date
+    description: Entered current bucket (as received from collections_cases).
+  - name: prior_bucket
+    description: Previous bucket (as received from collections_cases).
+  - name: bucket_path
+    description: Bucket sequence (as received from collections_cases).
+  - name: total_overdue
+    description: Past-due across case (CAD) (as received from collections_cases).
+  - name: total_exposure
+    description: Total outstanding across case (as received from collections_cases).
+  - name: entry_overdue
+    description: Past-due at open (as received from collections_cases).
+  - name: queue
+    description: Work queue (as received from collections_cases).
+  - name: assigned_team
+    description: Team (as received from collections_cases).
+  - name: assigned_agent_id
+    description: Current owner (as received from collections_cases).
+  - name: assignment_date
+    description: Date assigned (as received from collections_cases).
+  - name: language_of_service
+    description: 'EN / FR (as received from collections_cases). Sensitivity: Proxy (review).'
+  - name: strategy_code
+    description: Collections strategy (as received from collections_cases).
+  - name: strategy_version
+    description: Version (as received from collections_cases).
+  - name: test_cell
+    description: Champion / challenger / hold-out cell (as received from collections_cases).
+  - name: assignment_method
+    description: How cell was assigned (as received from collections_cases).
+  - name: treatment_path
+    description: Treatments applied in order (as received from collections_cases).
+  - name: current_treatment
+    description: Active treatment (as received from collections_cases).
+  - name: next_scheduled_action
+    description: Next planned action (as received from collections_cases).
+  - name: next_action_ts
+    description: When (never on a stat holiday. 30-Sep-2026 is NDTR) (as received from collections_cases).
+  - name: contact_attempts_total
+    description: All outbound attempts in case (as received from collections_cases).
+  - name: rpc_count
+    description: Right-party contacts (as received from collections_cases).
+  - name: last_contact_ts
+    description: Last contact attempt (as received from collections_cases).
+  - name: last_rpc_ts
+    description: Last right-party contact (as received from collections_cases).
+  - name: last_contact_channel
+    description: Channel (as received from collections_cases).
+  - name: promises_total
+    description: Promises made in case (as received from collections_cases).
+  - name: promises_kept
+    description: Kept (as received from collections_cases).
+  - name: promises_broken
+    description: Broken (as received from collections_cases).
+  - name: promises_open
+    description: Open (as received from collections_cases).
+  - name: current_ptp_id
+    description: Open promise (as received from collections_cases).
+  - name: current_ptp_amount
+    description: Open promise amount (as received from collections_cases).
+  - name: current_ptp_due_date
+    description: Open promise date (as received from collections_cases).
+  - name: payments_since_open_amount
+    description: Paid since case open (as received from collections_cases).
+  - name: payments_since_open_count
+    description: Number of payments since the case opened (as received from collections_cases).
+  - name: cure_flag
+    description: Returned to current (as received from collections_cases).
+  - name: cure_date
+    description: Cure date (as received from collections_cases).
+  - name: days_to_cure
+    description: Days from open to cure (as received from collections_cases).
+  - name: recidivism_flag
+    description: Re-entered collections within 90 days of a prior cure (as received from collections_cases).
+  - name: prior_cases_12m
+    description: Previous cases in 12 months (as received from collections_cases).
+  - name: hardship_flag
+    description: Financial hardship recorded (as received from collections_cases).
+  - name: hardship_source
+    description: agent_coded / customer_form / model / llm_flag (as received from collections_cases).
+  - name: hardship_reason
+    description: Stated reason (as received from collections_cases).
+  - name: hardship_program_offered
+    description: Programme offered (as received from collections_cases).
+  - name: hardship_program_accepted
+    description: Accepted (as received from collections_cases).
+  - name: hardship_plan_type
+    description: reduced_payment_3m / skip_payment / term_extension / rate_reduction / debt_management_plan (as received from
+      collections_cases).
+  - name: hardship_plan_start
+    description: Hardship plan start date (as received from collections_cases).
+  - name: hardship_plan_end
+    description: Hardship plan end date (as received from collections_cases).
+  - name: payment_plan_flag
+    description: Formal repayment plan (as received from collections_cases).
+  - name: plan_instalment_amount
+    description: Payment plan instalment amount (CAD) (as received from collections_cases).
+  - name: plan_instalments_total
+    description: Total instalments in the payment plan (as received from collections_cases).
+  - name: plan_instalments_paid
+    description: Plan instalments paid so far (as received from collections_cases).
+  - name: settlement_offered_flag
+    description: Settlement offered (late stage) (as received from collections_cases).
+  - name: settlement_amount
+    description: Agreed settlement amount (CAD) (as received from collections_cases).
+  - name: settlement_pct
+    description: Settlement / balance (as received from collections_cases).
+  - name: dispute_flag
+    description: Open dispute (as received from collections_cases).
+  - name: dispute_type
+    description: late_fee / fraud / billing_error / merchant / payment_not_applied (as received from collections_cases).
+  - name: dispute_date
+    description: Date the customer raised a dispute (as received from collections_cases).
+  - name: dispute_status
+    description: open / resolved_customer / resolved_bank (as received from collections_cases).
+  - name: complaint_flag
+    description: Complaint lodged (as received from collections_cases).
+  - name: complaint_date
+    description: Date the customer raised a complaint (as received from collections_cases).
+  - name: complaint_stage
+    description: Level (as received from collections_cases).
+  - name: cease_contact_flag
+    description: Cease-contact request active (as received from collections_cases).
+  - name: third_party_rep_flag
+    description: Represented (credit counsellor, lawyer, LIT) (as received from collections_cases).
+  - name: insolvency_hold_flag
+    description: Stay of proceedings (bankruptcy / consumer proposal) (as received from collections_cases).
+  - name: deceased_hold_flag
+    description: Deceased. estate handling (as received from collections_cases).
+  - name: skip_trace_flag
+    description: Customer unreachable. skip trace (as received from collections_cases).
+  - name: skip_trace_status
+    description: pending / found / not_found (as received from collections_cases).
+  - name: agency_placement_flag
+    description: Placed with third-party agency (as received from collections_cases).
+  - name: agency_name
+    description: Fictional agency (as received from collections_cases).
+  - name: agency_placement_date
+    description: Date the case was placed with an external agency (as received from collections_cases).
+  - name: legal_referral_flag
+    description: Referred to legal (as received from collections_cases).
+  - name: legal_status
+    description: demand_letter / statement_of_claim / judgment / garnishment (as received from collections_cases).
+  - name: repossession_initiated_flag
+    description: Auto repo started (as received from collections_cases).
+  - name: chargeoff_flag
+    description: Any account charged off (as received from collections_cases).
+  - name: chargeoff_date
+    description: Date the account was charged off (as received from collections_cases).
+  - name: chargeoff_amount
+    description: Balance charged off (CAD) (as received from collections_cases).
+  - name: recovered_post_chargeoff
+    description: Amount recovered after charge-off (CAD) (as received from collections_cases).
+  - name: province_code
+    description: 'Province at case open (for contact rules) (as received from collections_cases). Sensitivity: Quasi-identifier.'
+  - name: contact_rule_set
+    description: Contact-rule policy applied (as received from collections_cases).
+  - name: contact_cap_7d
+    description: Max attempts allowed per 7 days (as received from collections_cases).
+  - name: contacts_last_7d
+    description: Attempts in last 7 days (as received from collections_cases).
+  - name: contact_cap_breach_count
+    description: Breaches in case (as received from collections_cases).
+  - name: out_of_hours_contact_count
+    description: Attempts outside permitted hours (as received from collections_cases).
+  - name: days_in_collections
+    description: Days since open (as received from collections_cases).
+  - name: cost_to_collect_est
+    description: Estimated cost to date (as received from collections_cases).
+  - name: expected_loss_est
+    description: Bank's EL estimate at snapshot (as received from collections_cases).
+  - name: escalation_flag
+    description: Escalated to supervisor (as received from collections_cases).
+  - name: escalation_reason
+    description: complaint / vulnerability / dispute / abusive_customer (as received from collections_cases).
+  - name: supervisor_review_flag
+    description: Supervisor reviewed (as received from collections_cases).
+  - name: human_override_flag
+    description: Agent overrode system recommendation (as received from collections_cases).
+  - name: override_reason
+    description: Free text (as received from collections_cases).
+  - name: nba_recommendation_last
+    description: Last next-best-action shown to agent (incumbent rules engine) (as received from collections_cases).
+  - name: nba_accepted_flag
+    description: Agent followed it (as received from collections_cases).
+  - name: notes_count
+    description: Agent notes (as received from collections_cases).
+  - name: last_note_id
+    description: Latest note (as received from collections_cases).
+  - name: qa_flag_count
+    description: QA issues found (as received from collections_cases).
+  - name: outcome
+    description: Final outcome (closed cases) (as received from collections_cases).
+  - name: outcome_date
+    description: Date the case outcome was recorded (as received from collections_cases).
+  - name: roll_forward_count
+    description: Times case moved to worse bucket (as received from collections_cases).
+  - name: roll_back_count
+    description: Times case improved a bucket (as received from collections_cases).
+  - name: dpd_at_day_7
+    description: Case DPD 7 days after open (as received from collections_cases).
+  - name: overdue_at_day_7
+    description: Overdue 7 days after open (as received from collections_cases).
+  - name: dpd_at_day_14
+    description: Case DPD 14 days after open (as received from collections_cases).
+  - name: overdue_at_day_14
+    description: Overdue 14 days after open (as received from collections_cases).
+  - name: dpd_at_day_21
+    description: Case DPD 21 days after open (as received from collections_cases).
+  - name: overdue_at_day_21
+    description: Overdue 21 days after open (as received from collections_cases).
+  - name: dpd_at_day_30
+    description: Case DPD 30 days after open (as received from collections_cases).
+  - name: overdue_at_day_30
+    description: Overdue 30 days after open (as received from collections_cases).
+  - name: dpd_at_day_45
+    description: Case DPD 45 days after open (as received from collections_cases).
+  - name: overdue_at_day_45
+    description: Overdue 45 days after open (as received from collections_cases).
+  - name: dpd_at_day_60
+    description: Case DPD 60 days after open (as received from collections_cases).
+  - name: overdue_at_day_60
+    description: Overdue 60 days after open (as received from collections_cases).
+  - name: dpd_at_day_90
+    description: Case DPD 90 days after open (as received from collections_cases).
+  - name: overdue_at_day_90
+    description: Overdue 90 days after open (as received from collections_cases).
+  - name: src_system
+    description: Source (as received from collections_cases).
+  - name: batch_id
+    description: Batch (as received from collections_cases).
+  - name: extract_ts
+    description: Extract (as received from collections_cases).
+  - name: record_hash
+    description: Row hash for change detection (as received from collections_cases).
+  - name: _source_file
+    description: 'Lineage: file the row came from.'
+  - name: _batch_id
+    description: 'Lineage: load batch.'
+  - name: _loaded_at
+    description: 'Lineage: when the source file was loaded.'
+  - name: _source_system
+    description: 'Lineage: source system of the row.'
+  - name: _pipeline_run_id
+    description: 'Lineage: dbt invocation that built the row.'
+  description: Collections cases with the case's golden customer ID, case-link alarm and recomputed bucket.
+- name: contact_timeline
+  description: Contact history keyed by golden customer ID; channel_resolved fixes the REL-0926 rename.
+  columns:
+  - name: golden_customer_id
+    description: Golden customer ID from identity resolution (identity.crosswalk).
+  - name: channel_resolved
+    description: coalesce(channel_v2, channel) after the approved REL-0926 fix; channel as received before.
+  - name: channel_fix_applied
+    description: Whether the REL-0926 channel fix was approved when this table was built.
+  - name: contact_id
+    description: Contact event key (as received from contact_history).
+  - name: source_platform
+    description: Emitting system (as received from contact_history).
+  - name: case_id
+    description: Case (as received from contact_history).
+  - name: crm_customer_id
+    description: Customer (as known to platform) (as received from contact_history).
+  - name: account_id
+    description: Account ID as in the source system (card_account_id, loan_id or deposit_account_id).
+  - name: agent_id
+    description: Agent (human contacts) (as received from contact_history).
+  - name: campaign_id
+    description: Dialer/messaging campaign (as received from contact_history).
+  - name: strategy_code
+    description: Strategy that triggered contact (as received from contact_history).
+  - name: test_cell
+    description: Cell (copied from case at contact time) (as received from contact_history).
+  - name: treatment_code
+    description: Treatment (as received from contact_history).
+  - name: direction
+    description: outbound / inbound (as received from contact_history).
+  - name: channel
+    description: call / sms / email / push / ivr / letter / chat / branch (as received from contact_history).
+  - name: channel_v2
+    description: Renamed channel column (upstream release 26-Sep) (as received from contact_history).
+  - name: sub_channel
+    description: e.g. predictive_dial, preview_dial, sms_2way, email_html (as received from contact_history).
+  - name: contact_ts_utc
+    description: Event time UTC (as received from contact_history).
+  - name: contact_ts_local
+    description: Event time in customer's local zone (as received from contact_history).
+  - name: customer_time_zone
+    description: Zone used (as received from contact_history).
+  - name: day_of_week
+    description: "Mon\u2013Sun (local) (as received from contact_history)."
+  - name: stat_holiday_flag
+    description: Canadian statutory/provincial holiday (as received from contact_history).
+  - name: within_permitted_hours_flag
+    description: Within policy hours (as received from contact_history).
+  - name: attempt_number_case
+    description: 'Attempt # in case (as received from contact_history).'
+  - name: attempt_number_day
+    description: 'Attempt # that day (as received from contact_history).'
+  - name: contacts_prior_7d
+    description: Attempts in prior 7 days at time of contact (as received from contact_history).
+  - name: consent_status_at_time
+    description: Channel consent at event time (as received from contact_history).
+  - name: dialer_mode
+    description: predictive / progressive / preview / manual (as received from contact_history).
+  - name: phone_type_dialled
+    description: mobile / landline / work (as received from contact_history).
+  - name: dial_result
+    description: Telephony result (as received from contact_history).
+  - name: amd_result
+    description: Answering-machine detection (as received from contact_history).
+  - name: ring_duration_sec
+    description: Ring time (as received from contact_history).
+  - name: queue_wait_sec
+    description: Wait before agent (inbound/predictive) (as received from contact_history).
+  - name: talk_duration_sec
+    description: Talk time (as received from contact_history).
+  - name: hold_duration_sec
+    description: Hold (as received from contact_history).
+  - name: wrap_duration_sec
+    description: After-call work (as received from contact_history).
+  - name: abandoned_flag
+    description: Call abandoned (as received from contact_history).
+  - name: rpc_flag
+    description: Right-party contact (as received from contact_history).
+  - name: third_party_contact_flag
+    description: Spoke to someone else (as received from contact_history).
+  - name: identity_verified_flag
+    description: ID verified before disclosure (as received from contact_history).
+  - name: recording_notice_read_flag
+    description: '''This call may be recorded'' notice (as received from contact_history).'
+  - name: agent_identified_self_flag
+    description: Agent gave name, bank and purpose (as received from contact_history).
+  - name: language_used
+    description: 'EN / FR / other (as received from contact_history). Sensitivity: Proxy (review).'
+  - name: interpreter_used_flag
+    description: 'Interpreter service used (as received from contact_history). Sensitivity: Proxy (review).'
+  - name: outcome_code
+    description: Disposition code (as received from contact_history).
+  - name: outcome_desc
+    description: Description (as received from contact_history).
+  - name: sub_outcome_code
+    description: Secondary disposition (as received from contact_history).
+  - name: ptp_made_flag
+    description: Promise captured (as received from contact_history).
+  - name: ptp_id
+    description: Promise to pay affected by the incident, when the signal is a promise.
+  - name: payment_taken_flag
+    description: Payment taken on contact (as received from contact_history).
+  - name: payment_amount
+    description: Amount taken (as received from contact_history).
+  - name: payment_method
+    description: debit_card / pad / online_banking / e_transfer (as received from contact_history).
+  - name: dispute_raised_flag
+    description: Dispute raised (as received from contact_history).
+  - name: complaint_raised_flag
+    description: Complaint raised (as received from contact_history).
+  - name: hardship_mentioned_flag
+    description: Agent-coded hardship mention (as received from contact_history).
+  - name: cease_request_flag
+    description: Customer asked to stop contact (as received from contact_history).
+  - name: callback_requested_flag
+    description: Callback requested (as received from contact_history).
+  - name: callback_ts
+    description: Requested callback time (as received from contact_history).
+  - name: transferred_flag
+    description: Transferred (as received from contact_history).
+  - name: transfer_target
+    description: hardship_team / supervisor / fraud / french_queue (as received from contact_history).
+  - name: agent_coded_sentiment
+    description: positive / neutral / negative / hostile (as received from contact_history).
+  - name: call_recording_id
+    description: Recording (as received from contact_history).
+  - name: transcript_id
+    description: Transcript (as received from contact_history).
+  - name: voice_sample_id
+    description: WAV sample (as received from contact_history).
+  - name: note_id
+    description: Linked agent note (as received from contact_history).
+  - name: sms_template_id
+    description: SMS template (as received from contact_history).
+  - name: sms_text
+    description: 'Rendered SMS (as received from contact_history). Sensitivity: Direct PII.'
+  - name: sms_delivered_flag
+    description: Carrier delivered (as received from contact_history).
+  - name: sms_delivered_ts
+    description: When the SMS was delivered (as received from contact_history).
+  - name: sms_reply_flag
+    description: Customer replied (as received from contact_history).
+  - name: sms_opt_out_flag
+    description: "STOP / ARR\xCAT received (as received from contact_history)."
+  - name: payment_link_id
+    description: Payment link (as received from contact_history).
+  - name: link_clicked_flag
+    description: Link clicked (as received from contact_history).
+  - name: link_click_ts
+    description: When the customer clicked the message link (as received from contact_history).
+  - name: link_payment_flag
+    description: Payment via link (as received from contact_history).
+  - name: email_template_id
+    description: Email template (as received from contact_history).
+  - name: email_subject
+    description: Subject (as received from contact_history).
+  - name: email_delivered_flag
+    description: Delivered (as received from contact_history).
+  - name: email_opened_flag
+    description: Opened (pixel; inflated by Apple MPP) (as received from contact_history).
+  - name: email_open_ts
+    description: When the email was opened (as received from contact_history).
+  - name: email_clicked_flag
+    description: Clicked (as received from contact_history).
+  - name: email_bounce_type
+    description: hard / soft (as received from contact_history).
+  - name: email_unsubscribe_flag
+    description: Unsubscribed (as received from contact_history).
+  - name: push_template_id
+    description: Push template (as received from contact_history).
+  - name: push_delivered_flag
+    description: Whether the push notification was delivered (as received from contact_history).
+  - name: push_opened_flag
+    description: Push opened (as received from contact_history).
+  - name: app_session_after_contact_flag
+    description: App session within 24h (as received from contact_history).
+  - name: app_payment_after_contact_flag
+    description: App payment within 24h (as received from contact_history).
+  - name: letter_template_id
+    description: Letter (as received from contact_history).
+  - name: letter_mailed_date
+    description: Date the letter was mailed (as received from contact_history).
+  - name: letter_returned_flag
+    description: Returned mail (as received from contact_history).
+  - name: ivr_path
+    description: IVR menu path (as received from contact_history).
+  - name: ivr_self_serve_payment_flag
+    description: Paid in IVR (as received from contact_history).
+  - name: chat_session_id
+    description: Web/app chat (as received from contact_history).
+  - name: chat_message_count
+    description: Messages in chat (as received from contact_history).
+  - name: inbound_reason
+    description: why customer contacted bank (as received from contact_history).
+  - name: contact_cost_cad
+    description: Unit cost (as received from contact_history).
+  - name: vendor_id
+    description: Messaging vendor (as received from contact_history).
+  - name: qa_selected_flag
+    description: Selected for manual QA (as received from contact_history).
+  - name: qa_score
+    description: "Manual QA score 0\u2013100 (as received from contact_history)."
+  - name: qa_reviewer_id
+    description: Reviewer (as received from contact_history).
+  - name: system_event_type
+    description: 'For system rows: ptp_broken / ptp_kept / payment_received / bucket_change (as received from contact_history).'
+  - name: ops_incident_id
+    description: Linked operational incident (as received from contact_history).
+  - name: src_system
+    description: Source (as received from contact_history).
+  - name: batch_id
+    description: Batch (as received from contact_history).
+  - name: extract_ts
+    description: When the row was extracted (as received from contact_history).
+  - name: src_file_name
+    description: Source file name (as received from contact_history).
+  - name: record_hash
+    description: Row hash for change detection (as received from contact_history).
+  - name: contact_hour_local
+    description: Local hour of contact (as received from contact_history).
+  - name: minutes_since_prev_contact
+    description: Minutes since previous attempt in case (as received from contact_history).
+  - name: days_since_case_open_at_contact
+    description: Point-in-time (as received from contact_history).
+  - name: dpd_at_contact
+    description: Case DPD at contact time (point-in-time) (as received from contact_history).
+  - name: bucket_at_contact
+    description: Bucket at contact time (as received from contact_history).
+  - name: overdue_at_contact
+    description: Overdue at contact time (as received from contact_history).
+  - name: open_ptp_at_contact_flag
+    description: Open promise existed (as received from contact_history).
+  - name: broken_ptp_count_at_contact
+    description: Broken promises so far (as received from contact_history).
+  - name: rpc_count_prior_30d
+    description: Prior RPCs in 30 days (as received from contact_history).
+  - name: answer_rate_prior_30d
+    description: Share of prior calls answered (as received from contact_history).
+  - name: sms_segment_count
+    description: SMS segments (as received from contact_history).
+  - name: message_language
+    description: 'EN / FR (as received from contact_history). Sensitivity: Proxy (review).'
+  - name: email_client
+    description: gmail / apple_mail / outlook / other (as received from contact_history).
+  - name: device_type
+    description: ios / android / web (as received from contact_history).
+  - name: link_expiry_ts
+    description: Payment link expiry (as received from contact_history).
+  - name: agent_site
+    description: "Toronto / Montr\xE9al / Halifax / Calgary / Windsor / vendor_offshore (as received from contact_history)."
+  - name: agent_tenure_band_at_contact
+    description: <6m / 6-24m / 2y+ (as received from contact_history).
+  - name: script_id
+    description: Call script used (as received from contact_history).
+  - name: disclosure_version
+    description: Disclosure text version (as received from contact_history).
+  - name: recording_retention_until
+    description: Recording retention date (as received from contact_history).
+  - name: _source_file
+    description: 'Lineage: file the row came from.'
+  - name: _batch_id
+    description: 'Lineage: load batch.'
+  - name: _loaded_at
+    description: 'Lineage: when the source file was loaded.'
+  - name: _source_system
+    description: 'Lineage: source system of the row.'
+  - name: _pipeline_run_id
+    description: 'Lineage: dbt invocation that built the row.'
+- name: promises_to_pay
+  description: Promises to pay keyed by golden customer ID, with the approved INC-0914 adjustment columns.
+  columns:
+  - name: golden_customer_id
+    description: Golden customer ID from identity resolution (identity.crosswalk).
+  - name: ptp_id
+    description: Promise to pay affected by the incident, when the signal is a promise.
+  - name: case_id
+    description: Collections case (as received from promises_to_pay).
+  - name: crm_customer_id
+    description: Customer ID (CRM) (as received from promises_to_pay).
+  - name: account_id
+    description: Account ID as in the source system (card_account_id, loan_id or deposit_account_id).
+  - name: product
+    description: card, loan or deposit.
+  - name: contact_id
+    description: Contact where promise was made (as received from promises_to_pay).
+  - name: agent_id
+    description: Agent who took it (null = self-serve) (as received from promises_to_pay).
+  - name: ptp_channel
+    description: call / ivr / app / web / sms_reply (as received from promises_to_pay).
+  - name: ptp_created_ts
+    description: When the promise was made (as received from promises_to_pay).
+  - name: ptp_amount
+    description: Promised amount (as received from promises_to_pay).
+  - name: ptp_due_date
+    description: Promised date (as received from promises_to_pay).
+  - name: days_to_due_at_creation
+    description: Days between promise and due date (as received from promises_to_pay).
+  - name: ptp_type
+    description: single / instalment_1_of_n (as received from promises_to_pay).
+  - name: ptp_sequence_in_case
+    description: Nth promise in case (as received from promises_to_pay).
+  - name: prior_broken_ptp_count
+    description: Broken promises before this one (as received from promises_to_pay).
+  - name: overdue_at_creation
+    description: Overdue amount when the promise was made (CAD) (as received from promises_to_pay).
+  - name: ptp_to_overdue_ratio
+    description: Promised amount divided by overdue amount (as received from promises_to_pay).
+  - name: dpd_at_creation
+    description: Days past due when the promise was made (as received from promises_to_pay).
+  - name: payment_method_promised
+    description: online_banking / pad / debit_card / e_transfer / branch (as received from promises_to_pay).
+  - name: reminder_scheduled_flag
+    description: Reminder SMS/email scheduled before due (as received from promises_to_pay).
+  - name: grace_days
+    description: Days after due before 'broken' (as received from promises_to_pay).
+  - name: ptp_status
+    description: open / kept / partially_kept / broken / cancelled (as received from promises_to_pay).
+  - name: status_ts
+    description: When the status last changed (as received from promises_to_pay).
+  - name: amount_paid_against
+    description: Paid towards promise by status date (as received from promises_to_pay).
+  - name: paid_date
+    description: Date the promised payment was received (as received from promises_to_pay).
+  - name: broken_reason_agent_coded
+    description: forgot / no_funds / dispute / unreachable / other (as received from promises_to_pay).
+  - name: customer_stated_income_date
+    description: "'I get paid on\u2026' captured by agent (as received from promises_to_pay)."
+  - name: src_system
+    description: Source system (as received from promises_to_pay).
+  - name: batch_id
+    description: Load batch ID (as received from promises_to_pay).
+  - name: _source_file
+    description: 'Lineage: file the row came from.'
+  - name: _batch_id
+    description: 'Lineage: load batch.'
+  - name: _loaded_at
+    description: 'Lineage: when the source file was loaded.'
+  - name: incident_candidate
+    description: Promise matches the INC-0914 rule (broken on the outage day, paid the next day).
+  - name: ptp_status_adjusted
+    description: ptp_status with the approved INC-0914 adjustment; ptp_status stays as received.
+  - name: adjustment_reason
+    description: Why ptp_status_adjusted differs from ptp_status.
+  - name: incident_id
+    description: Incident behind an adjustment or effect.
+  - name: _source_system
+    description: 'Lineage: source system of the row.'
+  - name: _pipeline_run_id
+    description: 'Lineage: dbt invocation that built the row.'
+- name: incident_effects
+  description: Which customers each known incident affected, and through which signal (D-24).
+  columns:
+  - name: golden_customer_id
+    description: Golden customer ID from identity resolution (identity.crosswalk).
+  - name: source_key
+    description: source_system:source_id key of the record in identity resolution.
+  - name: signal
+    description: 'How the incident showed up: contact_tagged, ptp_broken_paid_next_day or late_fee_in_window.'
+  - name: account_id
+    description: Account ID as in the source system (card_account_id, loan_id or deposit_account_id).
+  - name: ptp_id
+    description: Promise to pay affected by the incident, when the signal is a promise.
+  - name: incident_id
+    description: Incident behind an adjustment or effect.
+  - name: _source_system
+    description: 'Lineage: source system of the row.'
+  - name: _source_file
+    description: 'Lineage: file the row came from.'
+  - name: _batch_id
+    description: 'Lineage: load batch.'
+  - name: _loaded_at
+    description: 'Lineage: when the source file was loaded.'
+  - name: _pipeline_run_id
+    description: 'Lineage: dbt invocation that built the row.'
+- name: l3_customer_features
+  description: 'Feature view for Layer 3: no identifiers, protected attributes or proxies (D-37).'
+  columns:
+  - name: golden_customer_id
+    description: 'Assigned by clustering; stable across runs. Source: identity.crosswalk.golden_customer_id'
+  - name: identity_confidence
+    description: "High / medium / low (architecture \xA77). Source: identity.golden_confidence.identity_confidence"
+  - name: verify_before_disclosure
+    description: 'True unless confidence is high. Source: identity.golden_confidence.identity_confidence'
+  - name: province_code
+    description: 'Most recently updated CRM record. Source: customers.province_code Sensitivity: Quasi-identifier.'
+  - name: time_zone
+    description: 'Most recently updated CRM record. Source: customers.time_zone'
+  - name: product_count
+    description: 'Count of linked accounts. Source: gold.c360_accounts.account_id'
+  - name: has_card
+    description: 'Any linked card. Source: gold.c360_accounts.product'
+  - name: has_loan
+    description: 'Any linked loan. Source: gold.c360_accounts.product'
+  - name: has_deposit
+    description: 'Any linked deposit account. Source: gold.c360_accounts.product'
+  - name: total_credit_exposure
+    description: 'Card balance + loan outstanding + overdraft used. Source: gold.c360_accounts.credit_exposure'
+  - name: max_dpd_current
+    description: 'Maximum over linked accounts. Source: gold.c360_accounts.dpd'
+  - name: open_case_id
+    description: 'Latest open case (outcome is null). Source: collections_cases.case_id'
+  - name: current_bucket
+    description: 'Bucket of the latest open case. Source: collections_cases.current_bucket'
+  - name: consent_call
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_call'
+  - name: consent_call_mobile
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_call_mobile'
+  - name: consent_autodialer
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_autodialer'
+  - name: consent_sms
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_sms'
+  - name: consent_email
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_email'
+  - name: consent_push
+    description: 'Most recent consent_last_updated_ts when identity confidence is high, else most restrictive. Source: customers.consent_push'
+  - name: cease_communication_flag
+    description: 'True if any merged CRM record is true. Source: customers.cease_communication_flag'
+  - name: internal_do_not_call_flag
+    description: 'True if any merged CRM record is true. Source: customers.internal_do_not_call_flag'
+  - name: deceased_flag
+    description: 'True if any merged CRM record is true. Source: customers.deceased_flag'
+  - name: bankruptcy_flag
+    description: 'True if any merged CRM record is true. Source: customers.bankruptcy_flag'
+  - name: consumer_proposal_flag
+    description: 'True if any merged CRM record is true. Source: customers.consumer_proposal_flag'
+  - name: legal_representative_flag
+    description: 'True if any merged CRM record is true. Source: customers.legal_representative_flag'
+  - name: credit_counselling_agency_flag
+    description: 'True if any merged CRM record is true. Source: customers.credit_counselling_agency_flag'
+  - name: hardship_flag
+    description: 'True if any case or account is true; protective use only. Source: collections_cases + account tables.hardship_flag,
+      hardship_program_flag'
+  - name: incident_affected
+    description: 'Any INC-0914 signal (D-24). Source: gold.incident_effects.golden_customer_id'
+  - name: _source_system
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._source_system'
+  - name: _source_file
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._source_file'
+  - name: _batch_id
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._batch_id'
+  - name: _loaded_at
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._loaded_at'
+  - name: _pipeline_run_id
+    description: 'Lineage column (CLAUDE.md rule 7). Source: pipeline._pipeline_run_id'

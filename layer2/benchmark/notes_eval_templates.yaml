@@ -1,0 +1,28 @@
+hardship:
+  - "Do the notes for case {case} say anything about the customer struggling financially?"
+  - "case {case}: any notes on job loss, illness or reduced hours affecting ability to pay?"
+  - "Please summarize what the agent notes indicate regarding the customer's financial difficulties on case {case}."
+  - "why can't the customer pay? check the notes on case {case}"
+  - "Est-ce que les notes du dossier {case} mentionnent des difficultés financières du client?"
+  - "dossier {case} : une note sur une perte d'emploi ou une maladie qui empêche le client de payer?"
+dispute:
+  - "Did the customer contest any fee or charge according to the notes for case {case}?"
+  - "case {case} notes - customer disagreeing with the balance?"
+  - "What do the notes on case {case} record about the customer challenging a transaction?"
+  - "Summarize any disagreement over charges, fees or the outstanding balance in the notes for case {case}."
+  - "Les notes du dossier {case} indiquent-elles que le client conteste des frais ou une transaction?"
+  - "dossier {case} : le client est-il en désaccord avec le solde selon les notes?"
+payment:
+  - "What payments or promises to pay are in the notes for case {case}?"
+  - "case {case}: any payment arrangement in the notes?"
+  - "When did the customer say they would pay? Check the notes for case {case}."
+  - "Please list the payment dates and amounts recorded in the agent notes for case {case}."
+  - "Quels paiements ou promesses de paiement figurent dans les notes du dossier {case}?"
+  - "dossier {case} : y a-t-il une note sur une entente de paiement ou une date de versement?"
+escalation:
+  - "Was case {case} escalated to a supervisor according to the notes?"
+  - "case {case} notes: any complaint from the customer?"
+  - "Did a manager get involved? Look at the notes for case {case}."
+  - "Provide a summary of complaints and escalations documented in the notes for case {case}."
+  - "Les notes du dossier {case} mentionnent-elles une plainte ou une intervention d'un superviseur?"
+  - "dossier {case} : le cas a-t-il été transféré à un gestionnaire d'après les notes?"

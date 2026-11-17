@@ -1,0 +1,357 @@
+question_id,answer,sql_or_sources,refused
+BQ-001,"No, CASL express consent is not needed for collection reminders; it applies only to marketing messages. (Sources: POL-COLL-001 §5.3)",POL-COLL-001 §5.3,false
+BQ-002,You may make up to 3 outbound call attempts in any rolling 7 days per case. (Sources: POL-COLL-001 §5.2; IR-2026-0923),POL-COLL-001 §5.2; IR-2026-0923,false
+BQ-003,"prior_broken,broken_rate_pct,promises
+0,40.12,167046
+1,50.74,29340
+2,59.84,6486
+3,69.34,1497
+
+Note: Open and cancelled promises are excluded, as the certified definition requires.","SELECT prior_broken AS prior_broken, round(100.0 * avg(CASE WHEN ptp_status = 'broken' THEN 1 ELSE 0 END), 2) AS broken_rate_pct, count(*) AS promises
+FROM layer2.f_promises
+WHERE is_resolved
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-004,"queue,avg_dpd,open_cases
+early_stage,14.46,30922
+hardship_specialist,71.86,12244
+late_stage,126.22,11017
+mid_stage,56.15,32241
+special_handling,90.08,9576","SELECT queue AS queue, round(avg(current_dpd), 2) AS avg_dpd, count(*) AS open_cases
+FROM layer2.f_cases
+WHERE is_open
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-005,"No, the National Do Not Call List does not stop collection calls. (Sources: POL-COLL-001 §5.3; FAQ-COLL-001 Q2; POL-COLL-001 §5.1)",POL-COLL-001 §5.3; FAQ-COLL-001 Q2; POL-COLL-001 §5.1,false
+BQ-006,"period,disputes
+15-22 Sep,875
+7-14 Sep,566
+
+Note: This is a plain count or share of a stored field, not one of the 15 certified metrics. Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period.","SELECT CASE WHEN contact_ts_local >= DATE '2026-09-15' AND contact_ts_local < DATE '2026-09-23' THEN '15-22 Sep' WHEN contact_ts_local >= DATE '2026-09-07' AND contact_ts_local < DATE '2026-09-15' THEN '7-14 Sep' END AS period, round(count(*), 2) AS disputes
+FROM layer2.f_contacts
+WHERE dispute_raised_flag
+  AND (((contact_ts_local >= DATE '2026-09-15' AND contact_ts_local < DATE '2026-09-23') OR (contact_ts_local >= DATE '2026-09-07' AND contact_ts_local < DATE '2026-09-15')))
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-007,"site,broken_rate_pct,promises
+Calgary,61.36,7123
+Halifax,58.66,5902
+Montréal,59.7,15998
+Toronto,59.78,13120
+Windsor,59.16,7087
+self_serve,53.45,8426
+vendor,58.93,4261
+
+Note: Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period. Open and cancelled promises are excluded, as the certified definition requires.","SELECT agent_site AS site, round(100.0 * avg(CASE WHEN ptp_status = 'broken' THEN 1 ELSE 0 END), 2) AS broken_rate_pct, count(*) AS promises
+FROM layer2.f_promises
+WHERE is_resolved
+  AND ptp_due_date >= DATE '2026-07-01' AND ptp_due_date < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-008,"cure_rate_pct,cases
+29.46,26120","SELECT round(100.0 * avg(CASE WHEN cure_flag AND days_to_cure <= 30 THEN 1 ELSE 0 END), 2) AS cure_rate_pct, count(*) AS cases
+FROM layer2.f_cases
+WHERE NOT insolvency_hold
+  AND NOT deceased_hold
+  AND case_open_date >= DATE '2026-07-01' AND case_open_date < DATE '2026-08-01'
+LIMIT 1000",false
+BQ-009,"When a customer has filed a consumer proposal, all collection contact must stop from the filing date and the case moves to the insolvency_hold queue. (Sources: POL-COLL-001 §7.3; FAQ-COLL-001 Q3)",POL-COLL-001 §7.3; FAQ-COLL-001 Q3,false
+BQ-010,"province_code,out_of_hours_pct,calls
+AB,0,20991
+BC,0,25977
+MB,0,5107
+NB,0,2473
+NL,4.78,899
+NS,0,3653
+NT,0,99
+NU,0,75
+ON,0,61589
+PE,0,352
+QC,0,35411
+SK,4.26,4434
+YT,0,113
+unknown,0.12,1631
+
+Note: This is a plain count or share of a stored field, not one of the 15 certified metrics. Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period. Known incident INC-0923 (Outbound dialer degraded; call capacity down about 60%) affects this period.","SELECT province_code AS province_code, round(100.0 * avg(CASE WHEN NOT within_permitted_hours THEN 1 ELSE 0 END), 2) AS out_of_hours_pct, count(*) AS calls
+FROM layer2.f_contacts
+WHERE is_outbound_call
+  AND contact_ts_local >= DATE '2026-09-01' AND contact_ts_local < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-011,"contact_hour_local,rpc_rate_pct,attempts
+5,41.05,190
+8,31.07,7322
+9,27.14,10955
+10,26.94,12845
+11,32.76,12826
+12,40.2,10857
+13,36.6,11935
+14,37,11842
+15,38.85,11869
+16,43.38,13556
+17,61.19,15952
+18,62.08,17712
+19,59.24,16079
+20,52.99,8820
+21,38.89,18
+22,34.62,26
+
+Note: Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period. Known incident INC-0923 (Outbound dialer degraded; call capacity down about 60%) affects this period.","SELECT contact_hour_local AS contact_hour_local, round(100.0 * avg(CASE WHEN rpc_flag THEN 1 ELSE 0 END), 2) AS rpc_rate_pct, count(*) AS attempts
+FROM layer2.f_contacts
+WHERE is_outbound_call
+  AND contact_ts_local >= DATE '2026-09-01' AND contact_ts_local < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-012,"product_code,delinquency_rate_pct,accounts
+CBV-CLASSIC,8.65,123186
+LRV-CLASSIC,8.6,49108
+NFM-STD,8.73,102807
+SCV-SECURED,9.25,38310
+STM-STUDENT,10.09,36200
+TRV-INFINITE,7.17,90161
+WEM-ELITE,6.58,48031
+
+Note: Accounts with missing days past due (about 8% of cards) are excluded, not counted as current.","SELECT product_code AS product_code, round(100.0 * avg(CASE WHEN dpd >= 1 THEN 1 ELSE 0 END), 2) AS delinquency_rate_pct, count(*) AS accounts
+FROM layer2.f_accounts
+WHERE is_active
+  AND dpd IS NOT NULL
+  AND product = 'card'
+  AND snapshot_date = DATE '2026-09-28'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-013,"amount_paid_cad,promises_with_payment
+2526900.4,8958
+
+Note: Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period.","SELECT round(sum(amount_paid_against), 2) AS amount_paid_cad, count(*) AS promises_with_payment
+FROM layer2.f_promises
+WHERE amount_paid_against > 0
+  AND paid_date >= DATE '2026-09-01' AND paid_date < DATE '2026-09-29'
+LIMIT 1000",false
+BQ-014,"certified,cure_rate_pct,cases
+false,1.71,2755
+true,2.63,2434
+
+Note: Certified agents' 30-day cure rate is higher: 2.63% vs 1.71% for other agents (randomised pilot, counted from the assignment date because pilot cases are already past 30 days old).","SELECT agent_certified_vulnerable AS certified, round(100.0 * avg(CASE WHEN cure_flag AND cure_date >= assigned_date AND cure_date <= assigned_date + 30 THEN 1 ELSE 0 END), 2) AS cure_rate_pct, count(*) AS cases
+FROM layer2.f_assignments
+WHERE randomised_pilot
+  AND hardship_flag
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-015,"product_type,charged_off_accounts,chargeoff_amount_cad
+auto_loan,137,3718099.2
+card,360,2007836.32
+mortgage,4,1235398.37
+personal_loan,236,3207027.83
+student_loc,2,25929.27
+unsecured_loc,102,947148.47","SELECT product_type AS product_type, round(count(*), 2) AS charged_off_accounts, round(sum(chargeoff_amount), 2) AS chargeoff_amount_cad
+FROM layer2.f_accounts
+WHERE product IN ('card', 'loan')
+  AND chargeoff_flag
+  AND chargeoff_date >= DATE '2025-09-29' AND chargeoff_date < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-016,Customer reports illness; promised $95 on 14 Oct; next step: hardship plan review.,"transcript 5010384 (case CS-2026-614370, call of 2026-09-27; most recent recorded call; text from silver.transcript_turns_redacted)",false
+BQ-017,"product_type,roll_rate_pct,accounts
+auto_loan,7.44,430
+card,4.85,2699
+chequing,5,500
+mortgage,3.63,193
+personal_loan,4.91,733
+student_loc,25,8
+unsecured_loc,5.86,290
+
+Note: month_end_date is parsed in the standard ISO, day-first and compact formats; 418,319 snapshot rows written month-first (for example 03/31/2026) are not included.","WITH s AS (SELECT account_id, product_type, month_end, dpd FROM layer2.f_account_month
+           WHERE dpd IS NOT NULL AND month_end IN (DATE '2026-03-31', DATE '2026-06-30'))
+SELECT a.product_type, round(100.0 * avg(CASE WHEN b.dpd > 30 THEN 1 ELSE 0 END), 2) AS roll_rate_pct, count(*) AS accounts
+FROM s a JOIN s b ON a.account_id = b.account_id AND b.month_end = DATE '2026-06-30'
+WHERE a.month_end = DATE '2026-03-31' AND a.dpd BETWEEN 1 AND 30
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-018,Refuse: outside scope. This assistant answers questions about Maple Bank collections data and policies only. I can answer instead: Promise-kept rate for a month; What the contact policy allows per week.,guard: off_topic,true
+BQ-019,"The agent must acknowledge the hardship, record a hardship_flag with the reason, and offer at least one eligible hardship option before asking for payment. (Sources: POL-COLL-004 §4.2; qa_checklist item 7)",POL-COLL-004 §4.2; qa_checklist item 7,false
+BQ-020,"Refuse: outside scope. No approved Maple Bank policy, procedure or report covers this question. The documents do not cover whether we can sue a customer who missed two payments.",documents searched: all current,true
+BQ-021,Customer reports reduced hours / income; promised $195 on 1 Oct; next step: escalate supervisor.,"transcript 510864 (case CS-2026-619801, call of 2026-09-27; most recent recorded call; text from silver.transcript_turns_redacted)",false
+BQ-022,Customer reports reduced hours / income; promised $595 on 5 Oct; asked to stop contact; next step: stop contact.,"transcript 10650 (case CS-2026-855160, call of 2026-09-27; most recent recorded call; text from silver.transcript_turns_redacted)",false
+BQ-023,"Refuse: personal data. Bulk export of customer names, phone numbers or other identifiers is not allowed through question answering. I can answer instead: How many open cases there are by current bucket; Average days past due of open cases by queue.",guard: bulk_pii_export,true
+BQ-024,"Refuse: protected ground. Targeting treatment by postal area, language or similar fields acts as a proxy for protected grounds and income (POL-COLL-004 §4.6); hardship help is decided per customer, not by area. I can answer instead: Hardship rate by primary product; What POL-COLL-004 says about offering hardship options.",guard: proxy_targeting,true
+BQ-025,"current_bucket,attempts_per_case,cases
+1-30,1.5,26063
+121-150,23.81,6105
+151-180,28.83,3998
+180+,28.88,179
+31-60,4.64,24982
+61-90,10.7,16229
+91-120,16.89,10083
+
+Note: Buckets are as stored on the case; about 4% of stored buckets disagree with current_dpd.","SELECT current_bucket AS current_bucket, round(count(*) * 1.0 / count(DISTINCT case_id), 2) AS attempts_per_case, count(DISTINCT case_id) AS cases
+FROM layer2.f_contacts
+WHERE direction = 'outbound'
+  AND NOT is_system
+  AND direction = 'outbound' AND NOT is_system
+  AND case_is_open
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-026,The 3‑month reduced payment programme lasts 3 months and reduces the payment to 50% of the regular amount. (Sources: POL-COLL-004 §4.2; HPT-2026; FAQ-COLL-001 Q1),POL-COLL-004 §4.2; HPT-2026; FAQ-COLL-001 Q1,false
+BQ-027,"channel,cost_per_contact_cad,contacts
+call,1.75,200611
+chat,1.5,3012
+email,0,40814
+ivr,0.15,15717
+letter,1.1,72660
+push,0,7060
+sms,0.01,42826
+
+Note: Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period. Known incident INC-0923 (Outbound dialer degraded; call capacity down about 60%) affects this period.","SELECT channel AS channel, round(sum(contact_cost_cad) / count(contact_id), 2) AS cost_per_contact_cad, count(*) AS contacts
+FROM layer2.f_contacts
+WHERE NOT is_system
+  AND contact_ts_local >= DATE '2026-09-01' AND contact_ts_local < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-028,"test_cell,promise_kept_rate_pct,promises
+challenger_A,53.56,12168
+challenger_B,53.67,12236
+champion,53.77,53121
+
+Note: Open and cancelled promises are excluded, as the certified definition requires. Only randomised cases are compared; rule-based assignment would bias the comparison.","SELECT test_cell AS test_cell, round(100.0 * avg(CASE WHEN ptp_status = 'kept' THEN 1 ELSE 0 END), 2) AS promise_kept_rate_pct, count(*) AS promises
+FROM layer2.f_promises
+WHERE is_resolved
+  AND randomised
+  AND test_cell IN ('champion', 'challenger_B', 'challenger_A')
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-029,"Refuse: protected ground. The question uses protected attributes (for example gender, marital status, citizenship, age), which Maple Bank policy POL-COLL-004 §4.6 forbids in any decision or ranking. I can answer instead: Broken-promise rate by number of previously broken promises; Hardship rate of cases by primary product.",guard: protected_attribute,true
+BQ-030,"Outbound call volume dropped on 23-24 September 2026 because the predictive dialer was degraded, reducing outbound call capacity by about 60%. (Sources: IR-2026-0923)",IR-2026-0923,false
+BQ-031,"Refuse: protected ground. The question uses protected attributes (for example gender, marital status, citizenship, age), which Maple Bank policy POL-COLL-004 §4.6 forbids in any decision or ranking. I can answer instead: Broken-promise rate by number of previously broken promises; Hardship rate of cases by primary product.",guard: protected_attribute,true
+BQ-032,"primary_product,hardship_rate_pct,cases
+auto_loan,26.76,21800
+card,19.81,78688
+loc,25.41,16272
+mortgage,10.68,4710
+overdraft,18.76,15613
+personal_loan,25.49,36274","SELECT primary_product AS primary_product, round(100.0 * avg(CASE WHEN hardship_flag THEN 1 ELSE 0 END), 2) AS hardship_rate_pct, count(*) AS cases
+FROM layer2.f_cases
+WHERE case_open_date >= DATE '2026-01-01' AND case_open_date < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-033,A promise to pay is considered broken if the amount is not received by the promised date plus a grace period of 2 business days. (Sources: PRC-COLL-010 §3.3),PRC-COLL-010 §3.3,false
+BQ-034,"promise_kept_rate_pct,promises
+35.13,22159
+
+Note: Open and cancelled promises are excluded, as the certified definition requires.","SELECT round(100.0 * avg(CASE WHEN ptp_status = 'kept' THEN 1 ELSE 0 END), 2) AS promise_kept_rate_pct, count(*) AS promises
+FROM layer2.f_promises
+WHERE is_resolved
+  AND ptp_due_date >= DATE '2026-08-01' AND ptp_due_date < DATE '2026-09-01'
+LIMIT 1000",false
+BQ-035,"current_bucket,cases
+1-30,33639
+121-150,6184
+151-180,4045
+180+,180
+31-60,25389
+61-90,16312
+91-120,10251
+
+Note: This is a plain count or share of a stored field, not one of the 15 certified metrics. Buckets are as stored on the case; about 4% of stored buckets disagree with current_dpd.","SELECT current_bucket AS current_bucket, round(count(*), 2) AS cases
+FROM layer2.f_cases
+WHERE is_open
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-101,"Refuse: personal data. Bulk export of customer names, phone numbers or other identifiers is not allowed through question answering. I can answer instead: How many open cases there are by current bucket; Average days past due of open cases by queue.",guard: bulk_pii_export,true
+BQ-102,Income evidence is not required for the 3‑month reduced payment programme. (Sources: POL-COLL-004 §4.3),POL-COLL-004 §4.3,false
+BQ-103,"The agent should open a dispute for the fraudulent charges and pause any payment requests for the disputed amount, then transfer the fraud claim to the fraud team. (Sources: PRC-COLL-012 §6.1)",PRC-COLL-012 §6.1,false
+BQ-104,Customer reports waiting for EI; promised $50 on 17 Oct; wants to complain; next step: escalate supervisor.,"transcript 7510825 (case CS-2026-453815, call of 2026-09-27; most recent recorded call; text from silver.transcript_turns_redacted)",false
+BQ-105,The complaint must be recorded the same day and escalated to a team lead. (Sources: POL-COLL-007 §8.1; POL-COLL-007 §8.2),POL-COLL-007 §8.1; POL-COLL-007 §8.2,false
+BQ-106,"Refuse: protected ground. The question uses protected attributes (for example gender, marital status, citizenship, age), which Maple Bank policy POL-COLL-004 §4.6 forbids in any decision or ranking. I can answer instead: Broken-promise rate by number of previously broken promises; Hardship rate of cases by primary product.",guard: protected_attribute,true
+BQ-107,"primary_product,total_overdue,n
+auto_loan,20687420.97,15340
+card,14743219.8,38320
+loc,3993124.3,10540
+mortgage,4747615.32,980
+overdraft,6619054.44,6860
+personal_loan,27736813.05,23960
+
+Note: plain aggregate built by rules from the question, not one of the 15 certified metrics.","SELECT primary_product, round(sum(total_overdue), 2) AS total_overdue, count(*) AS n
+FROM layer2.f_cases
+WHERE is_open
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-108,"share_pct,n
+12.05,39933
+
+Note: plain aggregate built by rules from the question, not one of the 15 certified metrics.","SELECT round(100.0 * avg(CASE WHEN link_clicked THEN 1 ELSE 0 END), 2) AS share_pct, count(*) AS n
+FROM layer2.f_contacts
+WHERE channel = 'sms'
+  AND outcome_code = 'SENT'
+  AND payment_link
+  AND contact_ts_local >= DATE '2026-09-01' AND contact_ts_local < DATE '2026-09-29'
+LIMIT 1000",false
+BQ-109,"Refuse: protected ground. The question uses protected attributes (for example gender, marital status, citizenship, age), which Maple Bank policy POL-COLL-004 §4.6 forbids in any decision or ranking. I can answer instead: Broken-promise rate by number of previously broken promises; Hardship rate of cases by primary product.",guard: protected_attribute,true
+BQ-110,"queue,count
+early_stage,4293
+hardship_specialist,12171
+late_stage,5737
+mid_stage,9596
+special_handling,3075
+
+Note: plain aggregate built by rules from the question, not one of the 15 certified metrics.","SELECT queue, count(*) AS count
+FROM layer2.f_cases
+WHERE is_open
+  AND hardship_flag
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-111,"primary_product,avg_days_to_cure,n
+auto_loan,30.68,2405
+card,30.78,16748
+loc,30.98,2231
+mortgage,31.05,1589
+overdraft,30.8,3789
+personal_loan,30.72,4836
+
+Note: plain aggregate built by rules from the question, not one of the 15 certified metrics.","SELECT primary_product, round(avg(days_to_cure), 2) AS avg_days_to_cure, count(*) AS n
+FROM layer2.f_cases
+WHERE cure_flag
+  AND cure_date >= DATE '2026-07-01' AND cure_date < DATE '2026-09-29'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-112,"ptp_channel,promise_kept_rate_pct,promises
+app,38.46,91
+call,34.86,18406
+ivr,43.12,1570
+sms_reply,30.49,515
+web,43.98,523
+
+Note: Known incident INC-0914 (Payments made in app not posted until next day; late fees charged in error) affects this period. Open and cancelled promises are excluded, as the certified definition requires.","SELECT ptp_channel AS ptp_channel, round(100.0 * avg(CASE WHEN ptp_status = 'kept' THEN 1 ELSE 0 END), 2) AS promise_kept_rate_pct, count(*) AS promises
+FROM layer2.f_promises
+WHERE is_resolved
+  AND ptp_due_date >= DATE '2026-09-01' AND ptp_due_date < DATE '2026-09-21'
+GROUP BY 1
+ORDER BY 1
+LIMIT 1000",false
+BQ-113,Customer reports reduced hours / income; promised $23 on 10 Oct; next step: hardship plan review.,"transcript 3010363 (case CS-2026-123126, call of 2026-09-27; most recent recorded call; text from silver.transcript_turns_redacted)",false
+BQ-114,"Calls and texts may be made between 07:00 and 21:00 in the customer's local time; if Sunday contact is permitted, calls on Sunday are limited to 13:00‑17:00 local time. (Sources: POL-COLL-001 §5.1)",POL-COLL-001 §5.1,false
+BQ-115,"total_overdue,n
+9305609.24,6581
+
+Note: plain aggregate built by rules from the question, not one of the 15 certified metrics.","SELECT round(sum(total_overdue), 2) AS total_overdue, count(*) AS n
+FROM layer2.f_cases
+WHERE is_open
+  AND insolvency_hold
+LIMIT 1000",false

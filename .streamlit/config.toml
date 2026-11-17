@@ -1,0 +1,56 @@
+[theme]
+# Colours, type and radii from design-system-starter/src/styles/design-tokens.css (dark theme) and its Tailwind scale
+base = "dark"
+primaryColor = "#4489FF"              # --bg-accent-primary
+backgroundColor = "#141414"           # --bg-page
+secondaryBackgroundColor = "#1F1F1F"  # --bg-elevated
+textColor = "#EBEBEB"                 # --text-primary (white at 92%)
+linkColor = "#49B0FF"                 # --text-link-strong
+linkUnderline = false
+borderColor = "#2E2E2E"               # --border-primary (white at 10% on the page)
+dataframeBorderColor = "#262626"      # --border-secondary
+dataframeHeaderBackgroundColor = "#191919"   # --bg-wash
+showWidgetBorder = true
+showSidebarBorder = true
+baseRadius = "0.75rem"                # rounded-xl cards
+buttonRadius = "0.5rem"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+codeFont = "monospace"
+baseFontSize = 14
+headingFontWeights = [700, 600, 600, 600, 500, 500]
+# design scale: page title text-20 bold, section text-17/15 semibold, card title text-14, labels text-13/12
+headingFontSizes = ["1.25rem", "1.0625rem", "0.9375rem", "0.875rem", "0.8125rem", "0.75rem"]
+metricValueFontWeight = 600
+redColor = "#F53B3A"                  # --color-red
+orangeColor = "#F58E3A"               # --color-orange
+greenColor = "#00EC7E"                # --color-green
+blueColor = "#337DF4"                 # --color-blue
+violetColor = "#956CDE"               # --color-purple
+# status tints as the design's badges: colour at 10% fill, full colour text
+redBackgroundColor = "#2A1A1A"
+redTextColor = "#FF6B6A"
+orangeBackgroundColor = "#2A2018"
+orangeTextColor = "#F8A660"
+yellowBackgroundColor = "#2A2018"         # the design has no yellow: warnings use its orange
+yellowTextColor = "#F8A660"
+yellowColor = "#F58E3A"
+greenBackgroundColor = "#13261C"
+greenTextColor = "#3DF29B"
+blueBackgroundColor = "#172235"
+blueTextColor = "#73B4FF"
+chartCategoricalColors = ["#4489FF", "#00EC7E", "#F58E3A", "#956CDE", "#F53B3A", "#49B0FF"]
+
+[theme.sidebar]
+backgroundColor = "#191919"           # --bg-wash
+secondaryBackgroundColor = "#1F1F1F"
+
+[client]
+# Viewer toolbar only: hides the Deploy button and developer options in the top-right menu
+toolbarMode = "viewer"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

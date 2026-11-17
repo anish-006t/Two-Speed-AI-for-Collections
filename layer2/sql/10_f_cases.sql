@@ -1,0 +1,36 @@
+-- One row per collections case. Open = no outcome yet (as in the certified average_dpd definition).
+-- randomised: only cases assigned to a test cell at random give an unbiased strategy comparison.
+CREATE OR REPLACE TABLE layer2.f_cases AS
+SELECT c.case_id,
+       __GOLDEN__ AS golden_customer_id,
+       nullif(trim(c.queue), '') AS queue,
+       nullif(trim(c.primary_product), '') AS primary_product,
+       nullif(trim(c.province_code), '') AS province_code,
+       nullif(trim(c.strategy_code), '') AS strategy_code,
+       nullif(trim(c.test_cell), '') AS test_cell,
+       nullif(trim(c.assignment_method), '') AS assignment_method,
+       coalesce(trim(c.assignment_method) = 'random', false) AS randomised,
+       try_cast(c.case_open_date AS DATE) AS case_open_date,
+       nullif(trim(c.case_status), '') AS case_status,
+       nullif(trim(c.outcome), '') AS outcome,
+       try_cast(c.outcome_date AS DATE) AS outcome_date,
+       nullif(trim(c.outcome), '') IS NULL AS is_open,
+       try_cast(c.current_dpd AS INTEGER) AS current_dpd,
+       nullif(trim(c.current_bucket), '') AS current_bucket,
+       __CASE_BUCKET__ AS bucket_from_dpd,
+       layer2.l2_bool(c.hardship_flag) AS hardship_flag,
+       nullif(trim(c.hardship_reason), '') AS hardship_reason,
+       layer2.l2_bool(c.cure_flag) AS cure_flag,
+       try_cast(c.cure_date AS DATE) AS cure_date,
+       try_cast(c.days_to_cure AS INTEGER) AS days_to_cure,
+       layer2.l2_bool(c.insolvency_hold_flag) AS insolvency_hold,
+       layer2.l2_bool(c.deceased_hold_flag) AS deceased_hold,
+       try_cast(c.contact_attempts_total AS INTEGER) AS contact_attempts_total,
+       try_cast(c.payments_since_open_amount AS DOUBLE) AS payments_since_open_amount,
+       try_cast(c.total_overdue AS DOUBLE) AS total_overdue,
+       try_cast(c.total_exposure AS DOUBLE) AS total_exposure,
+       nullif(trim(c.current_treatment), '') AS current_treatment,
+       c.assigned_agent_id AS agent_id,
+       a.site AS agent_site
+FROM __CASES__ c
+LEFT JOIN bronze.agents a ON a.agent_id = c.assigned_agent_id;

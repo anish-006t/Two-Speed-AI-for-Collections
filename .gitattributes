@@ -1,0 +1,4 @@
+# Model artifacts must keep their exact bytes on every OS: LightGBM can't read a model file whose line endings
+# Windows' core.autocrlf turned into CRLF ("Model format error, expect a tree here").
+layer4/models/**/model.txt -text
+layer4/models/**/metadata.json -text

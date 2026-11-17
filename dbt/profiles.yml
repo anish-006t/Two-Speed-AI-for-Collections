@@ -1,0 +1,14 @@
+# Run dbt from the repo root:  dbt build --project-dir dbt --profiles-dir dbt --target dev|full
+dhandho:
+  target: dev
+  outputs:
+    dev:     # 50K-customer geographic sample built by layer1/pipeline/ingest/sample.py
+      type: duckdb
+      path: "{{ env_var('DHANDHO_LAKE', 'lake') }}/dev.duckdb"
+      threads: 4
+      config_options: {memory_limit: "4GB", temp_directory: "{{ env_var('DHANDHO_LAKE', 'lake') }}/tmp", preserve_insertion_order: false}  # connect-time: settings would re-apply per thread and fail once spilling started
+    full:    # full release, bronze from layer1/pipeline/ingest/load_bronze.py
+      type: duckdb
+      path: "{{ env_var('DHANDHO_LAKE', 'lake') }}/maple.duckdb"
+      threads: 4
+      config_options: {memory_limit: "4GB", temp_directory: "{{ env_var('DHANDHO_LAKE', 'lake') }}/tmp", preserve_insertion_order: false}  # connect-time: settings would re-apply per thread and fail once spilling started

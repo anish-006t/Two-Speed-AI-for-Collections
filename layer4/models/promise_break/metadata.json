@@ -1,0 +1,167 @@
+{
+  "categorical": {
+    "current_bucket": [
+      "1-29",
+      "30-59",
+      "60-89",
+      "90+",
+      "current",
+      "unknown"
+    ]
+  },
+  "columns": [
+    "product_count",
+    "total_credit_exposure",
+    "max_dpd_current",
+    "current_bucket=1-29",
+    "current_bucket=30-59",
+    "current_bucket=60-89",
+    "current_bucket=90+",
+    "current_bucket=current",
+    "current_bucket=unknown",
+    "utilisation",
+    "incident_affected",
+    "prior_resolved_ptp_count",
+    "prior_broken_ptp_count",
+    "broken_promises_90d",
+    "prior_kept_ptp_rate",
+    "prior_avg_promised_amount",
+    "usual_payday",
+    "salary_delay_days",
+    "bureau_score_change",
+    "response_rate_call_90d",
+    "response_rate_sms_90d",
+    "response_rate_email_90d",
+    "response_rate_push_90d",
+    "text_stated_delay_reason",
+    "text_promise_mentioned",
+    "text_promise_amount",
+    "text_promise_intent_strength",
+    "promise_amount",
+    "days_ahead"
+  ],
+  "fill": {
+    "broken_promises_90d": 0.0,
+    "bureau_score_change": 0.0,
+    "days_ahead": 11.0,
+    "incident_affected": 0.0,
+    "max_dpd_current": 0.0,
+    "prior_avg_promised_amount": 115.0,
+    "prior_broken_ptp_count": 0.0,
+    "prior_kept_ptp_rate": 0.5,
+    "prior_resolved_ptp_count": 0.0,
+    "product_count": 1.0,
+    "promise_amount": 118.8,
+    "response_rate_call_90d": 0.6666666666666666,
+    "response_rate_email_90d": 0.0,
+    "response_rate_push_90d": 0.0,
+    "response_rate_sms_90d": 0.0,
+    "salary_delay_days": 0.0,
+    "text_promise_amount": 191.22,
+    "text_promise_intent_strength": 0.3,
+    "text_promise_mentioned": 0.0,
+    "text_stated_delay_reason": 0.0,
+    "total_credit_exposure": 5636.23,
+    "usual_payday": 26.0,
+    "utilisation": 0.24639714285714284
+  },
+  "metrics": {
+    "auc": 0.7745417382193704,
+    "brier": 0.19278003053073414,
+    "broken_rate": 0.5974409448818898,
+    "calibration": [
+      {
+        "band": 1,
+        "observed": 0.08327024981074943,
+        "predicted": 0.1576339285672963,
+        "rows": 3963
+      },
+      {
+        "band": 2,
+        "observed": 0.3772394650517285,
+        "predicted": 0.29792150485062224,
+        "rows": 3963
+      },
+      {
+        "band": 3,
+        "observed": 0.4817057784506687,
+        "predicted": 0.36057186333121244,
+        "rows": 3963
+      },
+      {
+        "band": 4,
+        "observed": 0.5460509714862478,
+        "predicted": 0.41527236817314017,
+        "rows": 3963
+      },
+      {
+        "band": 5,
+        "observed": 0.6032306915699142,
+        "predicted": 0.46893315708718813,
+        "rows": 3962
+      },
+      {
+        "band": 6,
+        "observed": 0.6317516405855629,
+        "predicted": 0.5260065581952926,
+        "rows": 3962
+      },
+      {
+        "band": 7,
+        "observed": 0.6895507319535588,
+        "predicted": 0.5989183700505317,
+        "rows": 3962
+      },
+      {
+        "band": 8,
+        "observed": 0.7375063099444725,
+        "predicted": 0.6962738126524151,
+        "rows": 3962
+      },
+      {
+        "band": 9,
+        "observed": 0.8609288238263503,
+        "predicted": 0.7949232454370011,
+        "rows": 3962
+      },
+      {
+        "band": 10,
+        "observed": 0.9634023220595659,
+        "predicted": 0.88729070648748,
+        "rows": 3962
+      }
+    ],
+    "rows": 198119,
+    "test_rows": 39624,
+    "top_decile_broken_rate": 0.9631592228110017,
+    "train_rows": 158495
+  },
+  "model_features": [
+    "product_count",
+    "total_credit_exposure",
+    "max_dpd_current",
+    "current_bucket",
+    "utilisation",
+    "incident_affected",
+    "prior_resolved_ptp_count",
+    "prior_broken_ptp_count",
+    "broken_promises_90d",
+    "prior_kept_ptp_rate",
+    "prior_avg_promised_amount",
+    "usual_payday",
+    "salary_delay_days",
+    "bureau_score_change",
+    "response_rate_call_90d",
+    "response_rate_sms_90d",
+    "response_rate_email_90d",
+    "response_rate_push_90d",
+    "text_stated_delay_reason",
+    "text_promise_mentioned",
+    "text_promise_amount",
+    "text_promise_intent_strength",
+    "promise_amount",
+    "days_ahead"
+  ],
+  "model_version": "lightgbm-promise-break-1",
+  "split": "oldest 80% train / newest 20% test"
+}

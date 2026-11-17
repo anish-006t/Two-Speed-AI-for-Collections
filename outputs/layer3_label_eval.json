@@ -1,0 +1,309 @@
+{
+  "results": [
+    {
+      "source": "transcript",
+      "question": "hardship",
+      "n": 500,
+      "accuracy": 0.72,
+      "macro_f1": 0.6255300920968088,
+      "brier": 0.1985039999999995,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "hardship_reason",
+      "n": 203,
+      "accuracy": 0.4729064039408867,
+      "macro_f1": 0.6107592524846046,
+      "brier": 0.22742610837438398,
+      "excluded": 16
+    },
+    {
+      "source": "transcript",
+      "question": "stated_delay_reason",
+      "n": 421,
+      "accuracy": 0.44418052256532065,
+      "macro_f1": 0.4110311102082298,
+      "brier": 0.2390106888361037,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "promise_mentioned",
+      "n": 500,
+      "accuracy": 0.82,
+      "macro_f1": 0.7977018935102766,
+      "brier": 0.12909760000000003,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "promise_amount",
+      "n": 373,
+      "accuracy": 0.14745308310991956,
+      "macro_f1": 0.09484732824427482,
+      "brier": 0.6641469168900824,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "promise_date",
+      "n": 373,
+      "accuracy": 0.0,
+      "macro_f1": 0.0,
+      "brier": 0.6074198391420952,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "promise_intent_strength",
+      "n": 373,
+      "accuracy": 0.1769436997319035,
+      "macro_f1": 0.1270293063461944,
+      "brier": 0.5022083109919591,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "dispute",
+      "n": 500,
+      "accuracy": 0.884,
+      "macro_f1": 0.5767906135076761,
+      "brier": 0.11715840000000043,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "dispute_type",
+      "n": 66,
+      "accuracy": 0.6363636363636364,
+      "macro_f1": 0.3942857142857143,
+      "brier": 0.18893636363636357,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "complaint",
+      "n": 500,
+      "accuracy": 0.96,
+      "macro_f1": 0.8463901689708142,
+      "brier": 0.08485120000000063,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "cease_request",
+      "n": 500,
+      "accuracy": 0.962,
+      "macro_f1": 0.6626300649881033,
+      "brier": 0.08571520000000062,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "insolvency_mention",
+      "n": 500,
+      "accuracy": 0.998,
+      "macro_f1": 0.9439399035766342,
+      "brier": 0.05825920000000052,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "third_party_present",
+      "n": 500,
+      "accuracy": 0.984,
+      "macro_f1": 0.4959677419354839,
+      "brier": 0.06592000000000056,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "legal_threat_by_agent",
+      "n": 500,
+      "accuracy": 0.99,
+      "macro_f1": 0.49748743718592964,
+      "brier": 0.06280000000000054,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "sentiment",
+      "n": 500,
+      "accuracy": 0.478,
+      "macro_f1": 0.35733254860659375,
+      "brier": 0.2988000000000009,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "next_step",
+      "n": 500,
+      "accuracy": 0.548,
+      "macro_f1": 0.266192368561109,
+      "brier": 0.2428976000000007,
+      "excluded": 0
+    },
+    {
+      "source": "transcript",
+      "question": "protected_attribute_mentioned",
+      "n": 500,
+      "accuracy": 0.942,
+      "macro_f1": 0.4850669412976313,
+      "brier": 0.09473200000000052,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "hardship",
+      "n": 500,
+      "accuracy": 0.81,
+      "macro_f1": 0.6465347644697151,
+      "brier": 0.15489599999999992,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "hardship_reason",
+      "n": 105,
+      "accuracy": 0.3619047619047619,
+      "macro_f1": 0.40578140507965066,
+      "brier": 0.2769047619047619,
+      "excluded": 5
+    },
+    {
+      "source": "note",
+      "question": "stated_delay_reason",
+      "n": 274,
+      "accuracy": 0.45255474452554745,
+      "macro_f1": 0.5492728226840694,
+      "brier": 0.21980218978102217,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "promise_mentioned",
+      "n": 500,
+      "accuracy": 0.676,
+      "macro_f1": 0.5702826585179527,
+      "brier": 0.2263840000000013,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "promise_amount",
+      "n": 207,
+      "accuracy": 0.10144927536231885,
+      "macro_f1": 0.07995735607675905,
+      "brier": 0.486289855072463,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "promise_date",
+      "n": 207,
+      "accuracy": 0.0,
+      "macro_f1": 0.0,
+      "brier": 0.513356521739129,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "promise_intent_strength",
+      "n": 207,
+      "accuracy": 0.0821256038647343,
+      "macro_f1": 0.1059190031152648,
+      "brier": 0.42426570048309126,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "dispute",
+      "n": 500,
+      "accuracy": 0.994,
+      "macro_f1": 0.8830956277764789,
+      "brier": 0.06024400000000052,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "dispute_type",
+      "n": 8,
+      "accuracy": 0.25,
+      "macro_f1": 0.3333333333333333,
+      "brier": 0.4718124999999999,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "complaint",
+      "n": 500,
+      "accuracy": 0.992,
+      "macro_f1": 0.8313090418353576,
+      "brier": 0.061379200000000515,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "cease_request",
+      "n": 500,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "brier": 0.057219200000000525,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "insolvency_mention",
+      "n": 500,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "brier": 0.05712400000000053,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "third_party_present",
+      "n": 500,
+      "accuracy": 0.982,
+      "macro_f1": 0.4954591321897074,
+      "brier": 0.06696000000000052,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "sentiment",
+      "n": 500,
+      "accuracy": 0.328,
+      "macro_f1": 0.2070087376835843,
+      "brier": 0.35880000000000156,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "next_step",
+      "n": 500,
+      "accuracy": 0.4,
+      "macro_f1": 0.5148631998649427,
+      "brier": 0.2458503999999997,
+      "excluded": 0
+    },
+    {
+      "source": "note",
+      "question": "protected_attribute_mentioned",
+      "n": 500,
+      "accuracy": 0.972,
+      "macro_f1": 0.6039828015388097,
+      "brier": 0.07429360000000054,
+      "excluded": 0
+    }
+  ],
+  "time_to_flag_hardship": {
+    "labelled": 262,
+    "flagged": 158,
+    "misses": 104,
+    "mean_delay_sec": 0.5409493670886076,
+    "median_delay_sec": 0.0
+  },
+  "extractor": "rules (offline; no API key set)"
+}

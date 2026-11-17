@@ -1,0 +1,326 @@
+# Layer 2 semantic catalog: the menu the planner picks from (architecture §6).
+# Certified metrics follow bronze.metric_definitions exactly (formula, default filters, time basis); their SQL is
+# hand-written once over the layer2 safe views and checked against the dev answers. Plain aggregates (counts,
+# shares of a stored flag) are allowed but labelled "not a certified metric".
+#
+# measure fields:
+#   view      layer2 view it reads            expr     SQL for the value (aggregate)
+#   name      value column name               count    population column name (count(*))
+#   where     always-on filters (SQL)         time     key into the view's time columns, or "snapshot" / "none"
+#   cues      phrases that point to it        certified true/false
+#   decimals  rounding of the value           unit     pct | cad | days | ratio | count
+#   special   roll_rate | cure_rate (built by code)
+
+views:
+  f_promises:
+    time: {due: ptp_due_date, paid: paid_date, created: ptp_created_ts}
+    time_cues: {paid: ["paid", "payments received", "collected"], created: ["made", "taken", "created"], due: ["due"]}
+    dimensions:
+      prior_broken: {column: prior_broken, phrases: ["number of previously broken", "previously broken promises", "prior broken", "previous broken"]}
+      site: {column: agent_site, phrases: ["agent site", "by site", "per site", "each site"]}
+      test_cell: {column: test_cell, phrases: ["test cell", "champion", "challenger", "strategy"]}
+      queue: {column: queue, phrases: ["by queue", "per queue"]}
+      primary_product: {column: primary_product, phrases: ["by primary product"]}
+      product: {column: product, phrases: ["by product", "per product"]}
+      ptp_channel: {column: ptp_channel, phrases: ["by channel", "promise channel"]}
+      current_bucket: {column: current_bucket, phrases: ["by current bucket", "by bucket"]}
+      province_code: {column: province_code, phrases: ["by province", "customer province"]}
+      month: {column: "strftime(ptp_due_date, '%Y-%m')", phrases: ["by month", "per month", "monthly"]}
+    filters:
+      randomised: {sql: "randomised", phrases: ["randomised", "randomized", "random assignment"]}
+  f_cases:
+    time: {opened: case_open_date, cured: cure_date}
+    time_cues: {opened: ["opened", "open in", "new cases"], cured: ["cured in", "cured"]}
+    dimensions:
+      queue: {column: queue, phrases: ["by queue", "per queue"]}
+      current_bucket: {column: current_bucket, phrases: ["by current bucket", "by bucket", "by delinquency bucket"]}
+      primary_product: {column: primary_product, phrases: ["by primary product", "by product", "per product"]}
+      province_code: {column: province_code, phrases: ["by province", "customer province"]}
+      test_cell: {column: test_cell, phrases: ["test cell", "champion", "challenger"]}
+      site: {column: agent_site, phrases: ["agent site", "by site"]}
+      strategy_code: {column: strategy_code, phrases: ["strategy code", "by strategy"]}
+      current_treatment: {column: current_treatment, phrases: ["by treatment", "current treatment"]}
+      month: {column: "strftime(case_open_date, '%Y-%m')", phrases: ["by month", "per month", "monthly"]}
+    filters:
+      open: {sql: "is_open", phrases: ["open case", "cases are open", "open today", "currently open", "cases open"]}
+      hardship: {sql: "hardship_flag", phrases: ["hardship cases", "cases with hardship"]}
+      randomised: {sql: "randomised", phrases: ["randomised", "randomized"]}
+  f_contacts:
+    time: {contact: contact_ts_local}
+    time_cues: {contact: []}
+    dimensions:
+      contact_hour_local: {column: contact_hour_local, phrases: ["hour of day", "local hour", "by hour", "per hour"]}
+      channel: {column: channel, phrases: ["by channel", "per channel", "each channel"]}
+      province_code: {column: province_code, phrases: ["by province", "customer province", "by customer province"]}
+      current_bucket: {column: current_bucket, phrases: ["by current bucket", "by bucket"]}
+      queue: {column: queue, phrases: ["by queue", "per queue"]}
+      site: {column: agent_site, phrases: ["agent site", "by site"]}
+      day_of_week: {column: day_of_week, phrases: ["day of week", "by weekday", "by day of the week"]}
+      outcome_code: {column: outcome_code, phrases: ["by outcome", "outcome code"]}
+      date: {column: contact_date, phrases: ["by day", "per day", "daily", "by date"]}
+      month: {column: "strftime(contact_ts_local, '%Y-%m')", phrases: ["by month", "per month", "monthly", "month by month"]}
+      test_cell: {column: test_cell, phrases: ["test cell", "champion", "challenger"]}
+      strategy_code: {column: strategy_code, phrases: ["strategy code", "by strategy"]}
+      treatment_code: {column: treatment_code, phrases: ["treatment code", "by treatment"]}
+    filters:
+      outbound_call: {sql: "is_outbound_call", phrases: ["outbound call"]}
+      outbound: {sql: "direction = 'outbound' AND NOT is_system", phrases: ["outbound contact", "outbound attempt", "outbound"]}
+      open_case: {sql: "case_is_open", phrases: ["open cases", "cases are open"]}
+      randomised: {sql: "randomised", phrases: ["randomised", "randomized"]}
+  f_accounts:
+    time: {chargeoff: chargeoff_date}
+    time_cues: {chargeoff: ["charged off", "written off", "charge-off", "write-off"]}
+    dimensions:
+      product_code: {column: product_code, phrases: ["card product", "product code"]}
+      product_type: {column: product_type, phrases: ["by product", "per product", "by product type"]}
+      product: {column: product, phrases: ["card or loan", "by product family"]}
+      account_status: {column: account_status, phrases: ["by status", "account status"]}
+    filters:
+      card_only: {sql: "product = 'card'", phrases: ["card account"], unless: ["loan"]}
+      loan_only: {sql: "product = 'loan'", phrases: ["loan account"], unless: ["card"]}
+      card_and_loan: {sql: "product IN ('card', 'loan')", phrases: ["card and loan"]}
+      active: {sql: "is_active", phrases: ["active"]}
+  f_account_month:
+    time: {}
+    dimensions:
+      product_type: {column: product_type, phrases: ["by product", "per product", "by product type"]}
+  f_assignments:
+    time: {opened: case_open_date}
+    dimensions:
+      certified: {column: agent_certified_vulnerable, phrases: ["certified", "certification"]}
+      queue: {column: queue, phrases: ["by queue"]}
+    filters:
+      randomised_pilot: {sql: "randomised_pilot", phrases: ["randomised pilot", "randomized pilot", "pilot", "randomised", "randomized"]}
+      hardship: {sql: "hardship_flag", phrases: ["hardship cases", "hardship"]}
+  f_deposits:
+    time: {}
+    dimensions:
+      product_type: {column: product_type, phrases: ["by product"]}
+    filters: {}
+
+measures:
+  broken_promise_rate:
+    view: f_promises
+    expr: "100.0 * avg(CASE WHEN ptp_status = 'broken' THEN 1 ELSE 0 END)"
+    name: broken_rate_pct
+    count: promises
+    where: ["is_resolved"]
+    time: due
+    unit: pct
+    certified: true
+    cues: ["broken-promise rate", "broken promise rate", "broken-promise", "broken promise", "broken ptp", "ptp break", "break rate"]
+  promise_kept_rate:
+    view: f_promises
+    expr: "100.0 * avg(CASE WHEN ptp_status = 'kept' THEN 1 ELSE 0 END)"
+    name: promise_kept_rate_pct
+    count: promises
+    where: ["is_resolved"]
+    time: due
+    unit: pct
+    certified: true
+    cues: ["promise-kept rate", "promise kept rate", "kept rate", "promises kept", "kept promises", "ptp kept",
+           "were kept", "kept in full"]
+  collected_amount:
+    view: f_promises
+    expr: "sum(amount_paid_against)"
+    name: amount_paid_cad
+    count: promises_with_payment
+    where: ["amount_paid_against > 0"]
+    time: paid
+    unit: cad
+    certified: true
+    cues: ["paid against promises", "amount collected", "dollars collected", "how much was paid", "how much was collected", "collected", "recoveries"]
+  cure_rate:
+    view: f_cases
+    special: cure_rate
+    name: cure_rate_pct
+    count: cases
+    where: ["NOT insolvency_hold", "NOT deceased_hold"]
+    time: opened
+    unit: pct
+    certified: true
+    cues: ["cure rate", "cured", "self-cure", "back to current", "return to current", "returned to current",
+           "came back to current"]
+  rpc_rate:
+    view: f_contacts
+    expr: "100.0 * avg(CASE WHEN rpc_flag THEN 1 ELSE 0 END)"
+    name: rpc_rate_pct
+    count: attempts
+    where: ["is_outbound_call"]
+    time: contact
+    unit: pct
+    certified: true
+    cues: ["right-party contact rate", "right party contact rate", "right-party contact", "rpc rate", "reach rate", "contact rate"]
+  ptp_rate:
+    view: f_contacts
+    expr: "100.0 * avg(CASE WHEN ptp_made_flag THEN 1 ELSE 0 END)"
+    name: ptp_rate_pct
+    count: right_party_contacts
+    where: ["rpc_flag"]
+    time: contact
+    unit: pct
+    certified: true
+    cues: ["ptp rate", "promise rate", "promises per right-party contact", "promise rate per right-party contact",
+           "promises per rpc", "ptp per rpc", "promises taken per"]
+  cost_per_contact:
+    view: f_contacts
+    expr: "sum(contact_cost_cad) / count(contact_id)"
+    name: cost_per_contact_cad
+    count: contacts
+    where: ["NOT is_system"]
+    time: contact
+    unit: cad
+    certified: true
+    cues: ["cost per contact", "contact cost", "cost per attempt"]
+  cost_per_rpc:
+    view: f_contacts
+    expr: "sum(contact_cost_cad) / nullif(sum(CASE WHEN rpc_flag THEN 1 ELSE 0 END), 0)"
+    name: cost_per_rpc_cad
+    count: contacts
+    where: ["NOT is_system"]
+    time: contact
+    unit: cad
+    certified: true
+    cues: ["cost per right-party contact", "cost per rpc"]
+  hardship_rate:
+    view: f_cases
+    expr: "100.0 * avg(CASE WHEN hardship_flag THEN 1 ELSE 0 END)"
+    name: hardship_rate_pct
+    count: cases
+    where: []
+    time: opened
+    unit: pct
+    certified: true
+    cues: ["hardship rate", "hardship share", "share of cases with hardship"]
+  delinquency_rate:
+    view: f_accounts
+    expr: "100.0 * avg(CASE WHEN dpd >= 1 THEN 1 ELSE 0 END)"
+    name: delinquency_rate_pct
+    count: accounts
+    where: ["is_active", "dpd IS NOT NULL"]
+    time: snapshot
+    snapshot_column: snapshot_date
+    unit: pct
+    certified: true
+    cues: ["delinquency rate", "delinquent share", "arrears rate", "1 or more days past due", "1+ days past due", "days past due today",
+           "delinquent", "in arrears"]
+  write_off_rate:
+    view: f_accounts
+    expr: "100.0 * avg(CASE WHEN __PERIOD__ THEN 1 ELSE 0 END)"
+    name: write_off_rate_pct
+    count: accounts
+    where: []
+    time: chargeoff
+    period_in_expr: true
+    unit: pct
+    certified: true
+    cues: ["write-off rate", "charge-off rate", "loss rate", "charged off", "written off", "write-off", "charge-off"]
+    # "how many ... and for how much" asks for the count and the amount instead of the rate
+    count_and_amount:
+      cues: ["how many", "how much", "for how much", "amount"]
+      where: ["chargeoff_flag"]     # counts charged-off accounts, also when no period is given
+      measures:
+        charged_off_accounts: "count(*)"
+        chargeoff_amount_cad: "sum(chargeoff_amount)"
+  average_dpd:
+    view: f_cases
+    expr: "avg(current_dpd)"
+    name: avg_dpd
+    count: open_cases
+    where: ["is_open"]
+    time: none
+    unit: days
+    certified: true
+    cues: ["average days past due", "average dpd", "mean dpd", "avg dpd", "average arrears age"]
+  contact_attempts_per_case:
+    view: f_contacts
+    expr: "count(*) * 1.0 / count(DISTINCT case_id)"
+    name: attempts_per_case
+    count: cases
+    count_expr: "count(DISTINCT case_id)"
+    where: ["direction = 'outbound'", "NOT is_system"]
+    time: contact
+    unit: ratio
+    certified: true
+    cues: ["attempts per case", "contact attempts", "touches per case", "contact intensity", "attempts did", "on average"]
+  payroll_delay_share:
+    view: f_deposits
+    expr: "100.0 * avg(CASE WHEN payroll_delay_days > 7 THEN 1 ELSE 0 END)"
+    name: payroll_delay_share_pct
+    count: payroll_accounts
+    where: ["product_type = 'chequing'", "payroll_deposit"]
+    time: none
+    unit: pct
+    certified: true
+    cues: ["payroll delay", "late payroll", "missed pay", "payroll deposit"]
+  roll_rate:
+    view: f_account_month
+    special: roll_rate
+    name: roll_rate_pct
+    count: accounts
+    unit: pct
+    certified: true
+    cues: ["roll rate", "rolled", "roll forward", "flow rate", "worse bucket", "deterioration"]
+  # ---- plain aggregates (not certified metrics) ----
+  dispute_count:
+    view: f_contacts
+    expr: "count(*)"
+    name: disputes
+    count: null
+    where: ["dispute_raised_flag"]
+    time: contact
+    unit: count
+    certified: false
+    cues: ["disputes", "dispute"]
+  complaint_count:
+    view: f_contacts
+    expr: "count(*)"
+    name: complaints
+    count: null
+    where: ["complaint_raised_flag"]
+    time: contact
+    unit: count
+    certified: false
+    cues: ["complaints", "complaint"]
+  out_of_hours_share:
+    view: f_contacts
+    expr: "100.0 * avg(CASE WHEN NOT within_permitted_hours THEN 1 ELSE 0 END)"
+    name: out_of_hours_pct
+    count: calls
+    where: ["is_outbound_call"]
+    time: contact
+    unit: pct
+    certified: false
+    cues: ["outside permitted calling hours", "outside permitted hours", "out of hours", "outside calling hours", "permitted hours"]
+  call_volume:
+    view: f_contacts
+    expr: "count(*)"
+    name: outbound_calls
+    count: null
+    where: ["is_outbound_call"]
+    time: contact
+    unit: count
+    certified: false
+    cues: ["call volume", "number of calls", "how many calls", "how many outbound calls", "number of outbound calls"]
+  case_count:
+    view: f_cases
+    expr: "count(*)"
+    name: cases
+    count: null
+    where: []
+    time: opened
+    unit: count
+    certified: false
+    cues: ["how many collections cases", "how many cases", "number of cases", "count of cases", "cases are open",
+           "how many open cases", "open cases are there",
+           "most open cases", "most cases", "number of open cases", "fewest cases"]
+  promise_count:
+    view: f_promises
+    expr: "count(*)"
+    name: promises
+    count: null
+    where: []
+    time: due
+    unit: count
+    certified: false
+    cues: ["how many promises", "number of promises"]

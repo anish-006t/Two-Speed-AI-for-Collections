@@ -1,0 +1,39 @@
+name: dhandho
+version: "0.1.0"
+config-version: 2
+profile: dhandho
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+snapshot-paths: ["snapshots"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+# Parser macros are DuckDB macros (dbt/macros/parsers.sql); create them before any model runs.
+on-run-start:
+  - "{{ create_parsers() }}"
+
+vars:
+  snapshot_date: "2026-09-28"
+  # Fixes and adjustment rules apply only after a named person approves them (architecture §10, §12).
+  # To approve, add an entry such as  {id: REL-0926-channel, approved_by: "<name>", approved_on: "2026-10-04"}.
+  approved_fixes:
+    # Approved in the Layer 1 working session on 2026-10-03 (approver recorded by role; no name given).
+    - {id: REL-0926-channel, approved_by: "Layer 1 owner", approved_on: "2026-10-03"}
+    # Delegated by the Layer 1 owner to the build session; affects the added ptp_status_adjusted columns only.
+    - {id: INC-0914-ptp, approved_by: "Layer 1 owner (delegated)", approved_on: "2026-10-03"}
+
+models:
+  dhandho:
+    silver:
+      +schema: silver
+      +materialized: table
+      staging:
+        +materialized: table
+    gold:
+      +schema: gold
+      +materialized: table
+    restricted:
+      +schema: restricted
+      +materialized: table

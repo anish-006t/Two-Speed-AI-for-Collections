@@ -1,0 +1,26 @@
+# Raw data and the lake never go to git (customer PII, even if synthetic)
+data/
+lake/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+.dagster/
+dbt/.user.yml
+
+# Secrets: API keys live only in .env (copy .env.example); never commit keys or key files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases, logs and caches anywhere in the tree (the lake/ folder is already ignored)
+*.duckdb
+*.duckdb.wal
+*.log
+.ipynb_checkpoints/
+.cache/

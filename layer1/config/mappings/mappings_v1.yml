@@ -1,0 +1,464 @@
+kind: source_to_target_mappings
+version: 1
+generated_on: '2026-10-03'
+how_to_approve: 'set status: approved, approved_by and approved_on; changes go into a new _vN file'
+entries:
+- id: gold.c360_customer.golden_customer_id
+  target: gold.c360_customer.golden_customer_id
+  source_table: identity.crosswalk
+  source_column: golden_customer_id
+  rule: assigned by clustering; stable across runs
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.crm_customer_ids
+  target: gold.c360_customer.crm_customer_ids
+  source_table: identity.crosswalk
+  source_column: source_id where source_system = 'CRM'
+  rule: all merged CRM records
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.source_keys
+  target: gold.c360_customer.source_keys
+  source_table: identity.crosswalk
+  source_column: source_key
+  rule: every source key in the cluster
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.match_probability
+  target: gold.c360_customer.match_probability
+  source_table: identity.crosswalk
+  source_column: match_probability
+  rule: lowest Splink probability among the links
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.identity_confidence
+  target: gold.c360_customer.identity_confidence
+  source_table: identity.golden_confidence
+  source_column: identity_confidence
+  rule: "high / medium / low (architecture \xA77)"
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.verify_before_disclosure
+  target: gold.c360_customer.verify_before_disclosure
+  source_table: identity.golden_confidence
+  source_column: identity_confidence
+  rule: true unless confidence is high
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.first_name
+  target: gold.c360_customer.first_name
+  source_table: customers
+  source_column: first_name
+  rule: most recently updated CRM record; else latest product
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.last_name
+  target: gold.c360_customer.last_name
+  source_table: customers
+  source_column: last_name
+  rule: most recently updated CRM record; else latest product
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.primary_phone_e164
+  target: gold.c360_customer.primary_phone_e164
+  source_table: customers
+  source_column: primary_phone_e164
+  rule: most recently updated CRM record; else latest product
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.best_reachable_phone
+  target: gold.c360_customer.best_reachable_phone
+  source_table: contact_history + customers
+  source_column: phone_number_hash, rpc_flag
+  rule: latest right-party contact on a consented CRM phone (D-06)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.email
+  target: gold.c360_customer.email
+  source_table: customers
+  source_column: email
+  rule: most recently updated CRM record (CRM only)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.date_of_birth
+  target: gold.c360_customer.date_of_birth
+  source_table: customers
+  source_column: date_of_birth
+  rule: CRM value; product DOB only when no CRM record (identity only)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.postal_code
+  target: gold.c360_customer.postal_code
+  source_table: customers
+  source_column: postal_code
+  rule: most recently updated CRM record; else latest product
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.province_code
+  target: gold.c360_customer.province_code
+  source_table: customers
+  source_column: province_code
+  rule: most recently updated CRM record
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.time_zone
+  target: gold.c360_customer.time_zone
+  source_table: customers
+  source_column: time_zone
+  rule: most recently updated CRM record
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.preferred_language
+  target: gold.c360_customer.preferred_language
+  source_table: customers
+  source_column: preferred_language
+  rule: most recently updated CRM record; servicing only, never a feature (Proxy, D-37)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.product_count
+  target: gold.c360_customer.product_count
+  source_table: gold.c360_accounts
+  source_column: account_id
+  rule: count of linked accounts
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.has_card
+  target: gold.c360_customer.has_card
+  source_table: gold.c360_accounts
+  source_column: product
+  rule: any linked card
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.has_loan
+  target: gold.c360_customer.has_loan
+  source_table: gold.c360_accounts
+  source_column: product
+  rule: any linked loan
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.has_deposit
+  target: gold.c360_customer.has_deposit
+  source_table: gold.c360_accounts
+  source_column: product
+  rule: any linked deposit account
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.total_credit_exposure
+  target: gold.c360_customer.total_credit_exposure
+  source_table: gold.c360_accounts
+  source_column: credit_exposure
+  rule: card balance + loan outstanding + overdraft used
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.max_dpd_current
+  target: gold.c360_customer.max_dpd_current
+  source_table: gold.c360_accounts
+  source_column: dpd
+  rule: maximum over linked accounts
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.open_case_id
+  target: gold.c360_customer.open_case_id
+  source_table: collections_cases
+  source_column: case_id
+  rule: latest open case (outcome is null)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.current_bucket
+  target: gold.c360_customer.current_bucket
+  source_table: collections_cases
+  source_column: current_bucket
+  rule: bucket of the latest open case
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consent_call
+  target: gold.c360_customer.consent_call
+  source_table: customers
+  source_column: consent_call
+  rule: most recent consent_last_updated_ts when identity confidence is high, else most restrictive
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consent_call_mobile
+  target: gold.c360_customer.consent_call_mobile
+  source_table: customers
+  source_column: consent_call_mobile
+  rule: most recent consent_last_updated_ts when identity confidence is high, else most restrictive
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consent_autodialer
+  target: gold.c360_customer.consent_autodialer
+  source_table: customers
+  source_column: consent_autodialer
+  rule: most recent consent_last_updated_ts when identity confidence is high, else most restrictive
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consent_sms
+  target: gold.c360_customer.consent_sms
+  source_table: customers
+  source_column: consent_sms
+  rule: most recent consent_last_updated_ts when identity confidence is high, else most restrictive
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consent_email
+  target: gold.c360_customer.consent_email
+  source_table: customers
+  source_column: consent_email
+  rule: most recent consent_last_updated_ts when identity confidence is high, else most restrictive
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consent_push
+  target: gold.c360_customer.consent_push
+  source_table: customers
+  source_column: consent_push
+  rule: most recent consent_last_updated_ts when identity confidence is high, else most restrictive
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.permitted_call_start_local
+  target: gold.c360_customer.permitted_call_start_local
+  source_table: customers
+  source_column: permitted_call_start_local
+  rule: most recently updated CRM record
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.permitted_call_end_local
+  target: gold.c360_customer.permitted_call_end_local
+  source_table: customers
+  source_column: permitted_call_end_local
+  rule: most recently updated CRM record
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.sunday_contact_permitted
+  target: gold.c360_customer.sunday_contact_permitted
+  source_table: customers
+  source_column: sunday_contact_permitted
+  rule: false if any merged CRM record is false
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.voicemail_permitted
+  target: gold.c360_customer.voicemail_permitted
+  source_table: customers
+  source_column: voicemail_permitted
+  rule: false if any merged CRM record is false
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.contact_at_work_permitted
+  target: gold.c360_customer.contact_at_work_permitted
+  source_table: customers
+  source_column: contact_at_work_permitted
+  rule: false if any merged CRM record is false
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.cease_communication_flag
+  target: gold.c360_customer.cease_communication_flag
+  source_table: customers
+  source_column: cease_communication_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.internal_do_not_call_flag
+  target: gold.c360_customer.internal_do_not_call_flag
+  source_table: customers
+  source_column: internal_do_not_call_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.deceased_flag
+  target: gold.c360_customer.deceased_flag
+  source_table: customers
+  source_column: deceased_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.bankruptcy_flag
+  target: gold.c360_customer.bankruptcy_flag
+  source_table: customers
+  source_column: bankruptcy_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.consumer_proposal_flag
+  target: gold.c360_customer.consumer_proposal_flag
+  source_table: customers
+  source_column: consumer_proposal_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.legal_representative_flag
+  target: gold.c360_customer.legal_representative_flag
+  source_table: customers
+  source_column: legal_representative_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.credit_counselling_agency_flag
+  target: gold.c360_customer.credit_counselling_agency_flag
+  source_table: customers
+  source_column: credit_counselling_agency_flag
+  rule: true if any merged CRM record is true
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.hardship_flag
+  target: gold.c360_customer.hardship_flag
+  source_table: collections_cases + account tables
+  source_column: hardship_flag, hardship_program_flag
+  rule: true if any case or account is true; protective use only
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.incident_affected
+  target: gold.c360_customer.incident_affected
+  source_table: gold.incident_effects
+  source_column: golden_customer_id
+  rule: any INC-0914 signal (D-24)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.source_systems
+  target: gold.c360_customer.source_systems
+  source_table: identity.crosswalk
+  source_column: source_system
+  rule: systems in the cluster
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer.survivorship_source
+  target: gold.c360_customer.survivorship_source
+  source_table: pipeline
+  source_column: ''
+  rule: which record supplied each group of fields
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer._source_system
+  target: gold.c360_customer._source_system
+  source_table: pipeline
+  source_column: _source_system
+  rule: lineage column (CLAUDE.md rule 7)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer._source_file
+  target: gold.c360_customer._source_file
+  source_table: pipeline
+  source_column: _source_file
+  rule: lineage column (CLAUDE.md rule 7)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer._batch_id
+  target: gold.c360_customer._batch_id
+  source_table: pipeline
+  source_column: _batch_id
+  rule: lineage column (CLAUDE.md rule 7)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer._loaded_at
+  target: gold.c360_customer._loaded_at
+  source_table: pipeline
+  source_column: _loaded_at
+  rule: lineage column (CLAUDE.md rule 7)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
+- id: gold.c360_customer._pipeline_run_id
+  target: gold.c360_customer._pipeline_run_id
+  source_table: pipeline
+  source_column: _pipeline_run_id
+  rule: lineage column (CLAUDE.md rule 7)
+  confidence: high
+  status: approved
+  approved_by: Anish
+  approved_on: '2026-10-03'
